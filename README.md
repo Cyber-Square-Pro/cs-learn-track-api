@@ -45,30 +45,32 @@ Hosting: AWS
    python3 -m venv env
    ```
    
-4. Activate the virtual environment      
+4. Activate the virtual environment
+       
    On Windows    
    ```
    cd env/scripts
    activate
-   ```  
+   ```
+   
    On Mac and Ubuntu  
    ```
    cd env/scripts
    source activate
    ```
    
-5. Goto to project folder using same terminal and install dependencies 
+6. Goto to project folder using same terminal and install dependencies 
    ```
    pip install -r requirements.txt
     ```  
 
-6. Migrate:  
+7. Migrate:  
     ```
     python manage.py migrate
     ```
-7. Start the development server
+8. Start the development server
    ```
    python manage.py runserver
    ```
-8. Test the api in Postman by the endpoint  
+9. Test the api in Postman by the endpoint  
        http://localhost:8000.
