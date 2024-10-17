@@ -32,7 +32,7 @@ Hosting: AWS
 
 1. Clone the repository,    
     ```
-        git clone -b development https://github.com/Cyber-Square-Pro/cs-learn-track-api.git
+    git clone -b development https://github.com/Cyber-Square-Pro/cs-learn-track-api.git
     ```
 
 2. Goto project directory    
@@ -45,7 +45,7 @@ Hosting: AWS
    python3 -m venv env
    ```
    
-4. Activate the virtual environment    
+4. Activate the virtual environment      
    On Windows    
    ```
    cd env/scripts
