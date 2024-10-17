@@ -31,10 +31,9 @@ Hosting: AWS
 ## 📝 Installation Guide
 
 1. Clone the repository,    
-   
-```bash
-    git clone -b development https://github.com/Cyber-Square-Pro/cs-learn-track-api.git
-```
+    ```
+        git clone -b development https://github.com/Cyber-Square-Pro/cs-learn-track-api.git
+    ```
 
 2. Goto project directory    
    ```
