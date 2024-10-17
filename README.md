@@ -46,7 +46,7 @@ git clone -b development https://github.com/Cyber-Square-Pro/cs-learn-track-api.
    python3 -m venv env
    ```
    
-4. Activate the virtual environment
+4. Activate the virtual environment  
    On Windows  
    ```
    cd env/scripts
@@ -72,4 +72,4 @@ git clone -b development https://github.com/Cyber-Square-Pro/cs-learn-track-api.
    python manage.py runserver
    ```
 8. Test the api in Postman by the endpoint  
-       http://localhost:3000.
+       http://localhost:8000.
