@@ -1,5 +1,5 @@
 # 📚CS Learn Track
-    A web-based Attendance Tracking System designed to manage student registration, batch creation, and attendance tracking efficiently. The platform provides distinct features for Admins and Students to   streamline academic administration and participation. This solution ensures smooth operations with batch management, session scheduling, and attendance monitoring, promoting organized learning.
+A web-based Attendance Tracking System designed to manage student registration, batch creation, and attendance tracking efficiently. The platform provides distinct features for Admins and Students to   streamline academic administration and participation. This solution ensures smooth operations with batch management, session scheduling, and attendance monitoring, promoting organized learning.
 
 ## Project Overview
    The system allows admins to manage students, create batches, assign students to batches, and schedule sessions. Students can log in, view schedules, and attend sessions by verifying their ID cards. Attendance is marked automatically upon successful ID verification, providing a reliable record-keeping system
