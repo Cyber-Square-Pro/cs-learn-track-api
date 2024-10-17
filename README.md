@@ -37,7 +37,7 @@ Hosting: AWS
 
 2. Goto project directory    
    ```
-   cd attendance-tracking-system
+   cd cs-learn-track-api
    ```
 
 3. Create a virtual environment 
