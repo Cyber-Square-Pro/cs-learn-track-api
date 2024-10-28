@@ -14,7 +14,7 @@ class AdminSignInEndPoint(APIView):
             return Response({"message": "Invalid data", "status":  status.HTTP_400_BAD_REQUEST})
         
         if AdminAccess.objects.get(username = request.data["username"]).password == request.data["password"]:
-            return Response({"message": "Admin logged in successfully", "status":  status.HTTP_200})
+            return Response({"message": "Admin logged in successfully", "status":  status.HTTP_200_OK})
         else:
             return Response({"message": "Invalid password", "status":  status.HTTP_400_BAD_REQUEST})
 
