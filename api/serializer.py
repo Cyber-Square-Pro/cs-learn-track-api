@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import AdminAccess, Student, Attendance
+from .models import AdminAccess
 
 class AdminAccessSerializer(serializers.ModelSerializer):
     class Meta:
