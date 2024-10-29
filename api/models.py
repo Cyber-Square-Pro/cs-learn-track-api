@@ -1,7 +1,7 @@
 from django.db import models
 
 # Create your models here.
-class Studentdata(models.Model):
+class StudentData(models.Model):
     studentName = models.CharField("Student Name",  max_length=30)
 
     studentID = models.IntegerField("Student Unique Identifier")

@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from api.models import Studentdata
+from api.models import StudentData
 
 class StudentLoginSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Studentdata
+        model = StudentData
         fields = ["studentID", "studentPassword"]
