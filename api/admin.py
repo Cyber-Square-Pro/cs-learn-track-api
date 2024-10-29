@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import AdminAccess
+from .models import AdminData
 
 
-admin.site.register(AdminAccess)
+admin.site.register(AdminData)
 

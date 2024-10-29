@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from .models import AdminAccess
+from .models import AdminData
 
-class AdminAccessSerializer(serializers.ModelSerializer):
+class AdminDataSerializer(serializers.ModelSerializer):
     class Meta:
-        model = AdminAccess
+        model = AdminData
         fields = ['username', 'password']
