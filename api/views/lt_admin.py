@@ -12,6 +12,22 @@ class LandingEndPoint(APIView):
 
 
 class AdminSignInEndPoint(APIView):
+    """
+    API endpoint for admin sign-in.
+
+    This endpoint allows an admin to log in by providing their username and password.
+    It validates the input data and checks if the admin exists in the database. If the 
+    admin exists, it verifies the password. Depending on the outcome of these checks, 
+    it returns an appropriate response.
+
+    Methods:
+        post(request): Handles POST requests for admin sign-in.
+            - Expects a JSON payload with 'username' and 'password'.
+            - Returns:
+                - 200 OK if login is successful.
+                - 400 Bad Request if the data is invalid or if the admin does not exist.
+                - 400 Bad Request if the password is incorrect.
+    """
     def post(self, request):
         serializer = AdminDataSerializer(data = request.data)
         if not serializer.is_valid():
