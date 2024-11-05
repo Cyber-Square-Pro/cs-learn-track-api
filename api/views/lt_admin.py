@@ -11,6 +11,23 @@ class LandingEndPoint(APIView):
 
 
 class StudentLoginEndPoint(APIView):
+    """
+    API endpoint for student login.
+
+    This endpoint handles POST requests for student login. It validates the provided
+    student credentials and checks if the student exists in the database. 
+
+    Methods:
+        post(request): 
+            Handles the login process for students. It expects a JSON payload with 
+            'studentID' and 'studentPassword'. If the credentials are valid, it returns 
+            a success message; otherwise, it returns an appropriate error message.
+
+    Responses:
+        - 200 OK: If the student is successfully logged in.
+        - 400 Bad Request: If the provided data is invalid, the student does not exist, 
+          or the password is incorrect.
+    """
     def post(self, request):
         serializer = StudentLoginSerializer(data = request.data)
         if not serializer.is_valid():
