@@ -9,3 +9,14 @@ class StudentData(models.Model):
 
     def __str__(self):
         return self.studentName
+
+class Batch(models.Model):
+    name = models.CharField(max_length=100)
+    schedule = models.TextField()  # Ask about it, unsure how to implement
+    description = models.TextField(blank=True, null=True)
+    grade = models.CharField(max_length=10)
+    section = models.CharField(max_length=10)
+    students = models.ManyToManyField(StudentData, related_name='batches')
+
+    def __str__(self):
+        return self.name
