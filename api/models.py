@@ -11,7 +11,7 @@ class StudentData(models.Model):
     def __str__(self):
         return self.studentName
 
-class Batch(models.Model): # ADD No of seats and if batch is active # Remov name from creation endpoint # POst after changed # CLass teacher as foreign key
+class Batch(models.Model): # CLass teacher as foreign key
     grade = models.CharField(max_length=10)
     section = models.CharField(max_length=10)
     seat_number = models.IntegerField("Number of seats available")

@@ -14,4 +14,4 @@ class BatchCreationSerializer(serializers.ModelSerializer):
 class StudentRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentData
-        fields = ["studentName", "studentID", "studentPassword"]
+        fields = ["studentName", "studentID", "studentPassword", "studentBatch"]
