@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from django.http import HttpResponse
 from rest_framework.response import Response
 from api.models import StudentData, Batch
-from api.serializer import StudentLoginSerializer, BatchCreationSerializer
+from api.serializer import StudentLoginSerializer, BatchCreationSerializer, StudentRegistrationSerializer
 from rest_framework import status
 
 class LandingEndPoint(APIView):
@@ -50,3 +50,12 @@ class BatchCreationEndPoint(APIView):
         
         serializer.save()
         return Response({"message": "Batch created successfully", "status": status.HTTP_201_CREATED})
+
+class RegisterStudentEndPoint(APIView):
+    def post(self, request):
+        serializer = StudentRegistrationSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({"message": "Invalid data", "errors": serializer.errors, "status": status.HTTP_400_BAD_REQUEST})
+        
+        serializer.save()
+        return Response({"message": "Student registered successfully", "status": status.HTTP_201_CREATED})
