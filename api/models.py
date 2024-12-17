@@ -31,6 +31,7 @@ class Batch(models.Model):
     section = models.CharField(max_length=10)
     seatNumber = models.IntegerField("Number of seats available")
     schedule = models.TextField()
+    batchIncharge = models.ForeignKey("Teacher", on_delete=models.SET_NULL, null=True, blank=True, related_name='batches')
 
     def __str__(self):
         return self.batchName
