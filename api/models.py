@@ -22,12 +22,26 @@ class StudentData(models.Model):
         return self.studentName
 
 class Batch(models.Model):
+    id = models.AutoField(primary_key=True)
+    batchName = models.CharField(max_length=50)
+    description = models.TextField(blank=True, null=True)
+    batchStatus = models.BooleanField("Batch Status", default=True)
+    createdAt = models.DateTimeField("Created At", auto_now_add=True)
     grade = models.CharField(max_length=10)
     section = models.CharField(max_length=10)
     seatNumber = models.IntegerField("Number of seats available")
-    activeBatch = models.BooleanField("Is the batch active", default=True)
     schedule = models.TextField()
-    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.batchName
+
+class Teacher(models.Model):
+    name = models.CharField("Name", max_length=50)
+    email = models.EmailField("Email", unique=True)
+    subject = models.CharField("Subject", max_length=50)
+    hireDate = models.DateField("Hire Date")
+    contactNo = models.CharField("Contact Number", max_length=15)
+    profilePic = models.ImageField("Profile Picture", upload_to='profile_pictures/', blank=True, null=True)
 
     def __str__(self):
         return self.name
