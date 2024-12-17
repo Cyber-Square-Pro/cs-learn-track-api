@@ -6,6 +6,18 @@ from api.serializer import StudentLoginSerializer, BatchCreationSerializer, Stud
 from rest_framework import status
 
 class LandingEndPoint(APIView):
+    """
+    API endpoint for landing page.
+
+    This endpoint handles GET requests and returns a welcome message.
+
+    Methods:
+        get(request): 
+            Returns a welcome message in HTML format.
+
+    Responses:
+        - 200 OK: Always returns a welcome message.
+    """
     def get(self, request):
         return HttpResponse('<h1 align="center" style="margin-top:200px">Welcome Onboard!..</h1>')
 
@@ -42,6 +54,21 @@ class StudentLoginEndPoint(APIView):
             return Response({"message": "Invalid password", "status": status.HTTP_400_BAD_REQUEST})
 
 class BatchCreationEndPoint(APIView):
+    """
+    API endpoint for batch creation.
+
+    This endpoint handles POST requests for creating a new batch. It validates the provided
+    batch data and saves it to the database.
+
+    Methods:
+        post(request): 
+            Handles the batch creation process. It expects a JSON payload with batch details.
+            If the data is valid, it creates a new batch and returns a success message.
+
+    Responses:
+        - 201 Created: If the batch is successfully created.
+        - 400 Bad Request: If the provided data is invalid.
+    """
     def post(self, request):
         serializer = BatchCreationSerializer(data=request.data)
         if not serializer.is_valid():
@@ -51,10 +78,65 @@ class BatchCreationEndPoint(APIView):
         return Response({"message": "Batch created successfully", "status": status.HTTP_201_CREATED})
 
 class RegisterStudentEndPoint(APIView):
+    """
+    API endpoint for student registration.
+
+    This endpoint handles POST requests for registering a new student. It validates the provided
+    student data and saves it to the database. The admission number is auto-generated based on the 
+    last student's admission number in the database.
+
+    Methods:
+        post(request): 
+            Handles the student registration process. It expects a JSON payload with student details.
+            If the data is valid, it registers the student and returns a success message.
+
+    Responses:
+        - 201 Created: If the student is successfully registered.
+        - 400 Bad Request: If the provided data is invalid or the batch does not exist.
+        - 500 Internal Server Error: If there is an error during the registration process.
+    """
     def post(self, request):
         serializer = StudentRegistrationSerializer(data=request.data)
         if not serializer.is_valid():
             return Response({"message": "Invalid data", "errors": serializer.errors, "status": status.HTTP_400_BAD_REQUEST})
         
-        serializer.save()
+        student_data = serializer.validated_data
+
+        # Check if the batch exists
+        try:
+            batch = Batch.objects.get(id=student_data["batch"].id)
+        except Batch.DoesNotExist:
+            return Response({"message": "Batch does not exist", "status": status.HTTP_400_BAD_REQUEST})
+
+        # Generate admission number
+        last_student = StudentData.objects.order_by('admissionNo').last()
+        if last_student:
+            admission_no = last_student.admissionNo + 1
+        else:
+            admission_no = 1000  # Starting admission number
+
+        # Save student data
+        student = StudentData.objects.create(
+            studentName=student_data["studentName"],
+            admissionNo=admission_no,
+            rollNo=0,  # Placeholder, will be updated later
+            studentClass=student_data["studentClass"],
+            division=student_data["division"],
+            gender=student_data["gender"],
+            fatherName=student_data["fatherName"],
+            email=student_data["email"],
+            contactNo=student_data["contactNo"],
+            joinedDate=student_data["joinedDate"],
+            accountStatus=student_data["accountStatus"],
+            studentPassword=student_data["studentPassword"],
+            batch=batch,
+            profilePic=student_data.get("profilePic")
+        )
+
+        # Update roll numbers in the batch
+        students_in_batch = StudentData.objects.filter(batch=batch).order_by('studentName')
+        for index, student in enumerate(students_in_batch, start=1):
+            student.rollNo = index
+            student.save()
+
         return Response({"message": "Student registered successfully", "status": status.HTTP_201_CREATED})
