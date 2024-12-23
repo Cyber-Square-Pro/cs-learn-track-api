@@ -27,10 +27,6 @@ class Batch(models.Model):
     description = models.TextField(blank=True, null=True)
     batchStatus = models.BooleanField("Batch Status", default=True)
     createdAt = models.DateTimeField("Created At", auto_now_add=True)
-    grade = models.CharField(max_length=10)
-    section = models.CharField(max_length=10)
-    seatNumber = models.IntegerField("Number of seats available")
-    schedule = models.TextField()
     batchIncharge = models.ForeignKey("Teacher", on_delete=models.SET_NULL, null=True, blank=True, related_name='batches')
 
     def __str__(self):
