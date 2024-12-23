@@ -127,7 +127,7 @@ class RegisterStudentEndPoint(APIView):
             email=student_data["email"],
             contactNo=student_data["contactNo"],
             joinedDate=student_data["joinedDate"],
-            accountStatus=student_data["accountStatus"],
+            # accountStatus=student_data["accountStatus"],
             studentPassword=student_data["studentPassword"],
             batch=batch,
             profilePic=student_data.get("profilePic")
