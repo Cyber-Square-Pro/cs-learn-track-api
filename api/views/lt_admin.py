@@ -40,15 +40,17 @@ class StudentLoginEndPoint(APIView):
           or the password is incorrect.
     """
     def post(self, request):
-        serializer = StudentLoginSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response({"message": "Invalid data", "status": status.HTTP_400_BAD_REQUEST})
-        student_data = serializer.validated_data
+        admission_no = request.data.get("admissionNo")
+        student_password = request.data.get("studentPassword")
 
-        if not StudentData.objects.filter(admissionNo=student_data["admissionNo"]).exists():
+        if not admission_no or not student_password:
+            return Response({"message": "Invalid data", "status": status.HTTP_400_BAD_REQUEST})
+
+        if not StudentData.objects.filter(admissionNo=admission_no).exists():
             return Response({"message": "Student does not exist", "status": status.HTTP_400_BAD_REQUEST})
         
-        if StudentData.objects.get(admissionNo=student_data["admissionNo"]).studentPassword == student_data["studentPassword"]:
+        student = StudentData.objects.get(admissionNo=admission_no)
+        if student.studentPassword == student_password:
             return Response({"message": "Student logged in successfully", "status": status.HTTP_200_OK})
         else:
             return Response({"message": "Invalid password", "status": status.HTTP_400_BAD_REQUEST})
