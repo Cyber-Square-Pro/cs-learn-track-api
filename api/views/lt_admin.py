@@ -5,6 +5,10 @@ from api.models import StudentData, Batch, Teacher
 from api.serializer import StudentLoginSerializer, BatchCreationSerializer, StudentRegistrationSerializer, TeacherRegistrationSerializer
 from rest_framework import status
 from api.helper_funcs import create_user
+from rest_framework_simplejwt.tokens import RefreshToken
+from api.permissions import isTeacher, isStudent
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 
 class LandingEndPoint(APIView):
     """
@@ -52,7 +56,13 @@ class StudentLoginEndPoint(APIView):
         
         student = StudentData.objects.get(admissionNo=admission_no)
         if student.studentPassword == student_password:
-            return Response({"message": "Student logged in successfully", "status": status.HTTP_200_OK})
+            refresh = RefreshToken.for_user(student)
+            return Response({
+                "message": "Student logged in successfully",
+                "status": status.HTTP_200_OK,
+                "refresh": str(refresh),
+                "access": str(refresh.access_token)
+            })
         else:
             return Response({"message": "Invalid password", "status": status.HTTP_400_BAD_REQUEST})
 
@@ -194,3 +204,23 @@ class RegisterTeacherEndPoint(APIView):
         )
 
         return Response({"message": "Teacher registered successfully", "status": status.HTTP_201_CREATED})
+
+class AuthTest(APIView):
+    """
+    API endpoint to test JWT authentication for students.
+
+    This endpoint handles GET requests and checks if the provided JWT token is valid.
+
+    Methods:
+        get(request): 
+            Returns a success message if the JWT token is valid.
+
+    Responses:
+        - 200 OK: If the JWT token is valid.
+        - 401 Unauthorized: If the JWT token is invalid or not provided.
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [isStudent]
+
+    def get(self, request):
+        return Response({"message": "JWT token is valid", "status": status.HTTP_200_OK})

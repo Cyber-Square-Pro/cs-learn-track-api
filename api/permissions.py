@@ -1,10 +1,20 @@
 from rest_framework.permissions import BasePermission
+from api.models import UserProfile
 
-class IsTeacher(BasePermission):
+class isTeacher(BasePermission):
     def has_permission(self, request, view):
-        print(dir(request.user))
-        return request.user.role == 'teacher'
+        if not request.user.id:
+            return False
+        
+        userProfile = UserProfile.objects.get(user=request.user)
 
-class IsStudent(BasePermission):
+        return userProfile.role == 'teacher'
+
+class isStudent(BasePermission):
     def has_permission(self, request, view):
-        return request.user.role == 'student'
+        if not request.user.id:
+            return False
+        
+        userProfile = UserProfile.objects.get(user=request.user)
+
+        return userProfile.role == 'student'
