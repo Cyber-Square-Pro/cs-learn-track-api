@@ -1,14 +1,14 @@
 from rest_framework.views import APIView
 from django.http import HttpResponse
 from rest_framework.response import Response
-from api.models import StudentData, Batch, Teacher
+from api.models import StudentData, Batch, Teacher, UserProfile
 from api.serializer import StudentLoginSerializer, BatchCreationSerializer, StudentRegistrationSerializer, TeacherRegistrationSerializer
 from rest_framework import status
 from api.helper_funcs import create_user
 from rest_framework_simplejwt.tokens import RefreshToken
 from api.permissions import isTeacher, isStudent
 from rest_framework_simplejwt.authentication import JWTAuthentication
-
+from django.contrib.auth.models import User
 
 class LandingEndPoint(APIView):
     """
@@ -56,7 +56,10 @@ class StudentLoginEndPoint(APIView):
         
         student = StudentData.objects.get(admissionNo=admission_no)
         if student.studentPassword == student_password:
-            refresh = RefreshToken.for_user(student)
+            userProfile = UserProfile.objects.filter(role="student").get(dbUniqueID=student.admissionNo)
+            user = User.objects.get(id=userProfile.user_id)
+
+            refresh = RefreshToken.for_user(user)
             return Response({
                 "message": "Student logged in successfully",
                 "status": status.HTTP_200_OK,
@@ -82,12 +85,20 @@ class BatchCreationEndPoint(APIView):
         - 201 Created: If the batch is successfully created.
         - 400 Bad Request: If the provided data is invalid.
     """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [isTeacher]
+
+
     def post(self, request):
         serializer = BatchCreationSerializer(data=request.data)
         if not serializer.is_valid():
             return Response({"message": "Invalid data", "status": status.HTTP_400_BAD_REQUEST})
         
-        serializer.save()
+        userProfile = UserProfile.objects.get(user_id=request.user.id)
+        teacher = Teacher.objects.get(id=userProfile.dbUniqueID)
+
+        serializer.save(batchIncharge=teacher)
+
         return Response({"message": "Batch created successfully", "status": status.HTTP_201_CREATED})
 
 class RegisterStudentEndPoint(APIView):
@@ -108,6 +119,9 @@ class RegisterStudentEndPoint(APIView):
         - 400 Bad Request: If the provided data is invalid or the batch does not exist.
         - 500 Internal Server Error: If there is an error during the registration process.
     """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [isTeacher]
+
     def post(self, request):
         serializer = StudentRegistrationSerializer(data=request.data)
         if not serializer.is_valid():
@@ -204,6 +218,51 @@ class RegisterTeacherEndPoint(APIView):
         )
 
         return Response({"message": "Teacher registered successfully", "status": status.HTTP_201_CREATED})
+
+class TeacherLoginEndPoint(APIView):
+    """
+    API endpoint for teacher login.
+
+    This endpoint handles POST requests for teacher login. It validates the provided
+    teacher credentials and checks if the teacher exists in the database. 
+
+    Methods:
+        post(request): 
+            Handles the login process for teachers. It expects a JSON payload with 
+            'email' and 'teacherPassword'. If the credentials are valid, it returns 
+            a success message; otherwise, it returns an appropriate error message.
+
+    Responses:
+        - 200 OK: If the teacher is successfully logged in.
+        - 400 Bad Request: If the provided data is invalid, the teacher does not exist, 
+            or the password is incorrect.
+    """
+    def post(self, request):
+        email = request.data.get("email")
+        teacher_password = request.data.get("teacherPassword")
+
+        if not email or not teacher_password:
+            return Response({"message": "Invalid data", "status": status.HTTP_400_BAD_REQUEST})
+
+        if not Teacher.objects.filter(email=email).exists():
+            return Response({"message": "Teacher does not exist", "status": status.HTTP_400_BAD_REQUEST})
+        
+        teacher = Teacher.objects.get(email=email)
+
+
+        if teacher.teacherPassword == teacher_password:
+            userProfile = UserProfile.objects.filter(role="teacher").get(dbUniqueID=teacher.id)
+            user = User.objects.get(id=userProfile.user_id)
+
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                "message": "Teacher logged in successfully",
+                "status": status.HTTP_200_OK,
+                "refresh": str(refresh),
+                "access": str(refresh.access_token)
+            })
+        else:
+            return Response({"message": "Invalid password", "status": status.HTTP_400_BAD_REQUEST})
 
 class AuthTest(APIView):
     """

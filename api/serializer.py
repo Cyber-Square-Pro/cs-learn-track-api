@@ -10,7 +10,7 @@ class StudentLoginSerializer(serializers.ModelSerializer):
 class BatchCreationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Batch
-        fields = ["batchName", "description", "batchIncharge"]
+        fields = ["batchName", "description"]
 
 class StudentRegistrationSerializer(serializers.ModelSerializer):
     class Meta:

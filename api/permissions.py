@@ -6,7 +6,7 @@ class isTeacher(BasePermission):
         if not request.user.id:
             return False
         
-        userProfile = UserProfile.objects.get(user=request.user)
+        userProfile = UserProfile.objects.get(user_id=request.user.id)
 
         return userProfile.role == 'teacher'
 
@@ -15,6 +15,6 @@ class isStudent(BasePermission):
         if not request.user.id:
             return False
         
-        userProfile = UserProfile.objects.get(user=request.user)
+        userProfile = UserProfile.objects.get(user_id=request.user.id)
 
         return userProfile.role == 'student'
