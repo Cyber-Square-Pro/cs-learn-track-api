@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from api.models import StudentData, Batch, AdminData
+from api.models import StudentData, Batch, AdminData, Teacher
 
 class StudentLoginSerializer(serializers.ModelSerializer):
     class Meta:
@@ -9,7 +9,7 @@ class StudentLoginSerializer(serializers.ModelSerializer):
 class BatchCreationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Batch
-        fields = ["batchName", "description", "batchIncharge"]
+        fields = ["batchName", "description"]
 
 class StudentRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -24,3 +24,12 @@ class AdminDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = AdminData
         fields = ['username', 'password']
+
+
+class TeacherRegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Teacher
+        fields = [
+            "name", "email", "contactNo", "hireDate", 
+            "teacherPassword", "profilePic"
+        ]
