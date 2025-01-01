@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from api.models import StudentData, Batch
+from api.models import StudentData, Batch, Teacher
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class StudentLoginSerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,4 +19,12 @@ class StudentRegistrationSerializer(serializers.ModelSerializer):
             "studentName", "studentClass", "division", 
             "gender", "fatherName", "email", "contactNo", "joinedDate", 
             "studentPassword", "batch", "profilePic"
+        ]
+
+class TeacherRegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Teacher
+        fields = [
+            "name", "email", "contactNo", "hireDate", 
+            "teacherPassword", "profilePic"
         ]

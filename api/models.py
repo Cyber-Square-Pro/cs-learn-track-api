@@ -1,6 +1,20 @@
+from django.contrib.auth.models import User
 from django.db import models
 
 # Create your models here.
+
+class UserProfile(models.Model):
+    ROLE_CHOICES = (
+        ('student', 'Student'),
+        ('teacher', 'Teacher'),
+    )
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    role = models.CharField("Role", max_length=10, choices=ROLE_CHOICES)
+    def __str__(self):
+        return f"{self.user.username} ({self.role})"
+
+
 class StudentData(models.Model):
     studentName = models.CharField("Student Name", max_length=30)
     admissionNo = models.IntegerField("Admission Number", unique=True)
@@ -33,11 +47,13 @@ class Batch(models.Model):
         return self.batchName
 
 class Teacher(models.Model):
+    id = models.AutoField(primary_key=True)
     name = models.CharField("Name", max_length=50)
     email = models.EmailField("Email", unique=True)
     subject = models.CharField("Subject", max_length=50)
     hireDate = models.DateField("Hire Date")
     contactNo = models.CharField("Contact Number", max_length=15)
+    teacherPassword = models.CharField("Teacher Password", max_length=100)
     profilePic = models.ImageField("Profile Picture", upload_to='profile_pictures/', blank=True, null=True)
 
     def __str__(self):

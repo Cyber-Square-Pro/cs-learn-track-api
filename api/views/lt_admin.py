@@ -1,9 +1,10 @@
 from rest_framework.views import APIView
 from django.http import HttpResponse
 from rest_framework.response import Response
-from api.models import StudentData, Batch
-from api.serializer import StudentLoginSerializer, BatchCreationSerializer, StudentRegistrationSerializer
+from api.models import StudentData, Batch, Teacher
+from api.serializer import StudentLoginSerializer, BatchCreationSerializer, StudentRegistrationSerializer, TeacherRegistrationSerializer
 from rest_framework import status
+from api.helper_funcs import create_user
 
 class LandingEndPoint(APIView):
     """
@@ -135,6 +136,13 @@ class RegisterStudentEndPoint(APIView):
             profilePic=student_data.get("profilePic")
         )
 
+        # Create user account
+        create_user(
+            username=student.admissionNo,
+            password=student.studentPassword,
+            email=student.email,
+            role="student"
+        )
         # Update roll numbers in the batch
         students_in_batch = StudentData.objects.filter(batch=batch).order_by('studentName')
         for index, student in enumerate(students_in_batch, start=1):
@@ -142,3 +150,47 @@ class RegisterStudentEndPoint(APIView):
             student.save()
 
         return Response({"message": "Student registered successfully", "status": status.HTTP_201_CREATED})
+
+class RegisterTeacherEndPoint(APIView):
+    """
+    API endpoint for teacher registration.
+
+    This endpoint handles POST requests for registering a new teacher. It validates the provided
+    teacher data and saves it to the database.
+
+    Methods:
+        post(request): 
+            Handles the teacher registration process. It expects a JSON payload with teacher details.
+            If the data is valid, it registers the teacher and returns a success message.
+
+    Responses:
+        - 201 Created: If the teacher is successfully registered.
+        - 400 Bad Request: If the provided data is invalid.
+        - 500 Internal Server Error: If there is an error during the registration process.
+    """
+    def post(self, request):
+        serializer = TeacherRegistrationSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({"message": "Invalid data", "errors": serializer.errors, "status": status.HTTP_400_BAD_REQUEST})
+        
+        teacher_data = serializer.validated_data
+
+        # Save teacher data
+        teacher = Teacher.objects.create(
+            name=teacher_data["name"],
+            email=teacher_data["email"],
+            contactNo=teacher_data["contactNo"],
+            hireDate=teacher_data["hireDate"],
+            teacherPassword=teacher_data["teacherPassword"],
+            profilePic=teacher_data.get("profilePic")
+        )
+
+        # Create user account
+        create_user(
+            username=teacher.id,
+            password=teacher.teacherPassword,
+            email=teacher.email,
+            role="teacher"
+        )
+
+        return Response({"message": "Teacher registered successfully", "status": status.HTTP_201_CREATED})
