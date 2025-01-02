@@ -9,5 +9,6 @@ urlpatterns = [
     path('teacher/register/', RegisterTeacherEndPoint.as_view()),
     path('teacher/login/', TeacherLoginEndPoint.as_view()),
     path('AuthTest/', AuthTest.as_view()),
-    path('adminendpoint/login/', AdminSignInEndPoint.as_view())
+    path('adminendpoint/login/', AdminSignInEndPoint.as_view()),
+    path('CheckUserTypeEndPoint/', CheckUserTypeEndPoint.as_view()),
 ]

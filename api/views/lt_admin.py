@@ -316,3 +316,15 @@ class AuthTest(APIView):
 
     def get(self, request):
         return Response({"message": "JWT token is valid", "status": status.HTTP_200_OK})
+
+class CheckUserTypeEndPoint(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [isTeacher, isStudent]
+
+    def post(self, request):
+        if not request.user.id:
+            return Response({"message": "Invalid User Token", "status": status.HTTP_400_BAD_REQUEST})
+        
+        userProfile = UserProfile.objects.get(user_id=request.user.id)
+
+        return Response({"role": userProfile.role, "status": status.HTTP_200_OK})
