@@ -95,6 +95,7 @@ class StudentLoginEndPoint(APIView):
             refresh = RefreshToken.for_user(user)
             return Response({
                 "message": "Student logged in successfully",
+                "name": student.studentName,
                 "status": status.HTTP_200_OK,
                 "refresh": str(refresh),
                 "access": str(refresh.access_token)
@@ -290,6 +291,7 @@ class TeacherLoginEndPoint(APIView):
             refresh = RefreshToken.for_user(user)
             return Response({
                 "message": "Teacher logged in successfully",
+                "name": teacher.name,
                 "status": status.HTTP_200_OK,
                 "refresh": str(refresh),
                 "access": str(refresh.access_token)
@@ -319,7 +321,7 @@ class AuthTest(APIView):
 
 class CheckUserTypeEndPoint(APIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [isTeacher, isStudent]
+    # permission_classes = [isTeacher, isStudent]
 
     def post(self, request):
         if not request.user.id:
