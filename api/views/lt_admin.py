@@ -206,7 +206,7 @@ class RegisterStudentEndPoint(APIView):
             student.rollNo = index
             student.save()
 
-        return Response({"message": "Student registered successfully", "status": status.HTTP_201_CREATED})
+        return Response({"message": "Student registered successfully", "admissionNo": admission_no, "status": status.HTTP_201_CREATED})
 
 class RegisterTeacherEndPoint(APIView):
     """
