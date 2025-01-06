@@ -12,4 +12,6 @@ urlpatterns = [
     path('AuthTest/', AuthTest.as_view()),
     path('adminendpoint/login/', AdminSignInEndPoint.as_view()),
     path('CheckUserTypeEndPoint/', CheckUserTypeEndPoint.as_view()),
+    path('teacher/data/', GetTeacherData.as_view()),
+    path('student/data/', GetStudentData.as_view()),
 ]
