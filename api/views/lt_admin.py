@@ -330,3 +330,30 @@ class CheckUserTypeEndPoint(APIView):
         userProfile = UserProfile.objects.get(user_id=request.user.id)
 
         return Response({"role": userProfile.role, "status": status.HTTP_200_OK})
+
+class ListBatchEndPoint(APIView):
+    """
+    API endpoint to list all batches a teacher is in charge of.
+
+    This endpoint handles GET requests and returns a dictionary of batches.
+
+    Methods:
+        get(request): 
+            Returns a dictionary of batches the teacher is in charge of.
+
+    Responses:
+        - 200 OK: If the request is successful.
+        - 401 Unauthorized: If the JWT token is invalid or not provided.
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [isTeacher]
+
+    def post(self, request):
+        userProfile = UserProfile.objects.get(user_id=request.user.id)
+        teacher = Teacher.objects.get(id=userProfile.dbUniqueID)
+        batches = Batch.objects.filter(batchIncharge=teacher)
+        
+        batch_list = [{"id": batch.id, "name": batch.batchName} for batch in batches]
+        
+        return Response({"batches": batch_list, "status": status.HTTP_200_OK})
+
