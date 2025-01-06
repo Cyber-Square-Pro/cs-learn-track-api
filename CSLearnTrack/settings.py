@@ -88,7 +88,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "learn_track_test",
         "USER": "postgres",
-        "PASSWORD": "Gopesh$2",
+        "PASSWORD": "root",
         "HOST": "localhost",
     }
 }
