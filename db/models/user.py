@@ -1,10 +1,5 @@
-from django.contrib.auth.models import User
 from django.db import models
-
-# Create your models here.
-class AdminData(models.Model):
-    username = models.CharField(max_length=150, unique=True)
-    password = models.CharField(max_length=128)
+from django.contrib.auth.models import User
 
 class UserProfile(models.Model):
     ROLE_CHOICES = (
@@ -38,17 +33,6 @@ class StudentData(models.Model):
 
     def __str__(self):
         return self.studentName
-
-class Batch(models.Model):
-    id = models.AutoField(primary_key=True)
-    batchName = models.CharField(max_length=50)
-    description = models.TextField(blank=True, null=True)
-    batchStatus = models.BooleanField("Batch Status", default=True)
-    createdAt = models.DateTimeField("Created At", auto_now_add=True)
-    batchIncharge = models.ForeignKey("Teacher", on_delete=models.SET_NULL, null=True, blank=True, related_name='batches')
-
-    def __str__(self):
-        return self.batchName
 
 class Teacher(models.Model):
     id = models.AutoField(primary_key=True)

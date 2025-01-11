@@ -1,15 +1,5 @@
 from rest_framework import serializers
-from api.models import StudentData, Batch, AdminData, Teacher
-
-class StudentLoginSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = StudentData
-        fields = ["admissionNo", "studentPassword"]
-
-class BatchCreationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Batch
-        fields = ["batchName", "description"]
+from db.models import StudentData, AdminData, Teacher
 
 class StudentRegistrationSerializer(serializers.ModelSerializer):
     class Meta:

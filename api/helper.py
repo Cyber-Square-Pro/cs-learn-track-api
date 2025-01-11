@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from api.models import UserProfile
+from db.models import UserProfile
 
 def create_user(username, password, email, role):
     # Create a new User instance

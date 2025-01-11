@@ -1,5 +1,5 @@
 from rest_framework.permissions import BasePermission
-from api.models import UserProfile
+from db.models import UserProfile
 
 class isTeacher(BasePermission):
     def has_permission(self, request, view):
