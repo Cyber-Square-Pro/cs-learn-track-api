@@ -41,10 +41,10 @@ class ListBatchEndPoint(APIView):
     """
     API endpoint to list all batches a teacher is in charge of.
 
-    This endpoint handles GET requests and returns a dictionary of batches.
+    This endpoint handles POST requests and returns a dictionary of batches.
 
     Methods:
-        get(request): 
+        post(request): 
             Returns a dictionary of batches the teacher is in charge of.
 
     Responses:
@@ -69,10 +69,10 @@ class GetTeacherData(APIView):
     """
     API endpoint to get all data of a teacher.
 
-    This endpoint handles GET requests and returns all the data of the teacher.
+    This endpoint handles POST requests and returns all the data of the teacher.
 
     Methods:
-        get(request): 
+        post(request): 
             Returns all data of the teacher.
 
     Responses:
@@ -102,10 +102,10 @@ class GetStudentData(APIView):
     """
     API endpoint to get all data of a student.
 
-    This endpoint handles GET requests and returns all the data of the student.
+    This endpoint handles POST requests and returns all the data of the student.
 
     Methods:
-        get(request): 
+        post(request): 
             Returns all data of the student.
 
     Responses:
@@ -125,7 +125,6 @@ class GetStudentData(APIView):
             "studentName": student.studentName,
             "rollNo": student.rollNo,
             "studentClass": student.studentClass,
-            "division": student.division,
             "gender": student.gender,
             "fatherName": student.fatherName,
             "email": student.email,
@@ -136,3 +135,40 @@ class GetStudentData(APIView):
         }
         return Response({"student_data": student_data, "status": status.HTTP_200_OK})
 
+class GetTeacherDashboardDetails(APIView):
+    """
+    API endpoint to get the dashboard details of a teacher.
+
+    This endpoint handles POST requests and returns the dashboard details of the teacher.
+
+    Methods:
+        post(request): 
+            Returns the dashboard details of the teacher.
+
+    Responses:
+        - 200 OK: If the request is successful with the total number of students, active teachers, and last 3 active students.
+        - 401 Unauthorized: If the JWT token is invalid or not provided.
+
+    Created by: Yash Raj on 13/01/2024
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [isTeacher]
+
+    def post(self, request):
+        total_students = StudentData.objects.count()
+        active_teachers = UserProfile.objects.filter(role='teacher', active=True).count()
+
+        recent_students_details = []
+        recent_students = UserProfile.objects.filter(role='student').order_by('-last_login')[:3]
+        for student in recent_students:
+            student_data = StudentData.objects.get(admissionNo=student.dbUniqueID)
+            student_data = {
+                "admissionNo": student_data.admissionNo,
+                "studentName": student_data.studentName,
+                "batch": student_data.batch.batchName,
+                "email": student_data.email,
+                "active": student.active
+            }
+            recent_students_details.append(student_data)
+
+        return Response({"total_students": total_students, "active_teachers": active_teachers, "recent_students_details": recent_students_details, "status": status.HTTP_200_OK})
