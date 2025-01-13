@@ -5,6 +5,9 @@ from api.serializers import *
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import User
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 
 class AdminSignInEndPoint(APIView):
     """
@@ -73,6 +76,8 @@ class StudentLoginEndPoint(APIView):
         if student.studentPassword == student_password:
             userProfile = UserProfile.objects.filter(role="student").get(dbUniqueID=student.admissionNo)
             user = User.objects.get(id=userProfile.user_id)
+            userProfile.active = True
+            userProfile.save()
 
             refresh = RefreshToken.for_user(user)
             return Response({
@@ -120,6 +125,8 @@ class TeacherLoginEndPoint(APIView):
         if teacher.teacherPassword == teacher_password:
             userProfile = UserProfile.objects.filter(role="teacher").get(dbUniqueID=teacher.id)
             user = User.objects.get(id=userProfile.user_id)
+            userProfile.active = True
+            userProfile.save()
 
             refresh = RefreshToken.for_user(user)
             return Response({
@@ -130,3 +137,31 @@ class TeacherLoginEndPoint(APIView):
             })
         else:
             return Response({"message": "Invalid password", "status": status.HTTP_400_BAD_REQUEST})
+
+class LogoutEndPoint(APIView):
+    """
+    API endpoint for user logout.
+
+    This endpoint handles POST requests for user logout. It invalidates the user's token
+    and logs them out.
+
+    Methods:
+        post(request): 
+            Handles the logout process for users. It invalidates the user's token and logs them out.
+
+    Responses:
+        - 200 OK: If the user is successfully logged out.
+        - 400 Bad Request: If the token is invalid or not provided.
+
+    Created by: Yash Raj on 14/01/2024
+    """
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        userProfile = UserProfile.objects.get(user_id=request.user.id)
+        userProfile.active = False
+        userProfile.save()
+
+        return Response({"message": "Logged out successfully", "status": status.HTTP_200_OK})
