@@ -18,3 +18,4 @@ class isStudent(BasePermission):
         userProfile = UserProfile.objects.get(user_id=request.user.id)
 
         return userProfile.role == 'student'
+
