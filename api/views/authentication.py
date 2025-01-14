@@ -84,6 +84,7 @@ class StudentLoginEndPoint(APIView):
                 "message": "Student logged in successfully",
                 "name": student.studentName,
                 "status": status.HTTP_200_OK,
+                "refresh": str(refresh),
                 "access": str(refresh.access_token)
             })
         else:
@@ -133,6 +134,7 @@ class TeacherLoginEndPoint(APIView):
                 "message": "Teacher logged in successfully",
                 "name": teacher.name,
                 "status": status.HTTP_200_OK,
+                "refresh": str(refresh),
                 "access": str(refresh.access_token)
             })
         else:
@@ -160,6 +162,15 @@ class LogoutEndPoint(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+
+        refresh_token = request.data.get("refresh")
+        if refresh_token:
+            try:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+            except Exception as e:
+                return Response({"message": "Invalid token", "status": status.HTTP_400_BAD_REQUEST})
+
         userProfile = UserProfile.objects.get(user_id=request.user.id)
         userProfile.active = False
         userProfile.save()
