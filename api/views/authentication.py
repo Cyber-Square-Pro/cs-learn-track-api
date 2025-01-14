@@ -82,8 +82,8 @@ class StudentLoginEndPoint(APIView):
             refresh = RefreshToken.for_user(user)
             return Response({
                 "message": "Student logged in successfully",
+                "name": student.studentName,
                 "status": status.HTTP_200_OK,
-                "refresh": str(refresh),
                 "access": str(refresh.access_token)
             })
         else:
@@ -131,7 +131,7 @@ class TeacherLoginEndPoint(APIView):
             refresh = RefreshToken.for_user(user)
             return Response({
                 "message": "Teacher logged in successfully",
-                "teacher_name": teacher.name,
+                "name": teacher.name,
                 "status": status.HTTP_200_OK,
                 "access": str(refresh.access_token)
             })
