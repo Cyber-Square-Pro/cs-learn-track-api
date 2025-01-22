@@ -156,7 +156,7 @@ class GetTeacherDashboardDetails(APIView):
 
     def post(self, request):
         total_students = StudentData.objects.count()
-        active_teachers = UserProfile.objects.filter(role='teacher', active=True).count()
+        active_students = UserProfile.objects.filter(role='student', active=True).count()
 
         recent_students_details = []
         recent_students = UserProfile.objects.filter(role='student').order_by('-last_login')[:3]
@@ -171,4 +171,4 @@ class GetTeacherDashboardDetails(APIView):
             }
             recent_students_details.append(student_data)
 
-        return Response({"total_students": total_students, "active_teachers": active_teachers, "recent_students_details": recent_students_details, "status": status.HTTP_200_OK})
+        return Response({"total_students": total_students, "active_students": active_students, "recent_students_details": recent_students_details, "status": status.HTTP_200_OK})
