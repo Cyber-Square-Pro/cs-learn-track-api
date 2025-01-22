@@ -200,7 +200,7 @@ class LogoutEndPoint(APIView):
                 token = RefreshToken(refresh_token)
                 token.blacklist()
             except Exception as e:
-                return Response({"message": "Invalid token", "status": status.HTTP_400_BAD_REQUEST})
+                return Response({"message": "Invalid token", "status": status.HTTP_400_BAD_REQUEST, "error": str(e)})
 
         userProfile = UserProfile.objects.get(user_id=request.user.id)
         userProfile.active = False
