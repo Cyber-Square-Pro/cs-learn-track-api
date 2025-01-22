@@ -8,6 +8,37 @@ from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+class RegenerateAccessToken(APIView):
+    """
+    API endpoint to regenerate access token.
+
+    This endpoint handles POST requests to regenerate an access token using a refresh token.
+    It validates the provided refresh token and returns a new access token if valid.
+
+    Methods:
+        post(request): 
+            Handles the token regeneration process. It expects a JSON payload with 
+            'refresh'. If the token is valid, it returns a new access token; otherwise, 
+            it returns an appropriate error message.
+
+    Responses:
+        - 200 OK: If the token is successfully regenerated.
+        - 400 Bad Request: If the provided token is invalid.
+
+    Created by: Yash Raj on 22/01/2024
+    """
+    def post(self, request):
+        refresh_token = request.data.get("refresh")
+        if refresh_token:
+            try:
+                token = RefreshToken(refresh_token)
+                return Response({
+                    "access": str(token.access_token),
+                    "status": status.HTTP_200_OK
+                })
+            except Exception as e:
+                return Response({"message": "Invalid token", "status": status.HTTP_400_BAD_REQUEST})
+        return Response({"message": "Invalid token", "status": status.HTTP_400_BAD_REQUEST})
 
 class AdminSignInEndPoint(APIView):
     """
