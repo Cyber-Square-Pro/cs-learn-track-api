@@ -23,7 +23,7 @@ class BatchCreationEndPoint(APIView):
         - 201 Created: If the batch is successfully created.
         - 400 Bad Request: If the provided data is invalid.
 
-    Created by: Yash Raj on 11/01/2024
+    Created by: Yash Raj on 11/01/2025
     """
     authentication_classes = [JWTAuthentication]
     permission_classes = [isTeacher]
@@ -59,7 +59,7 @@ class RegisterStudentEndPoint(APIView):
         - 400 Bad Request: If the provided data is invalid or the batch does not exist.
         - 500 Internal Server Error: If there is an error during the registration process.
 
-    Created by: Yash Raj on 11/01/2024
+    Created by: Yash Raj on 11/01/2025
     """
     authentication_classes = [JWTAuthentication]
     permission_classes = [isTeacher]
@@ -134,7 +134,7 @@ class RegisterTeacherEndPoint(APIView):
         - 400 Bad Request: If the provided data is invalid.
         - 500 Internal Server Error: If there is an error during the registration process.
 
-    Created by: Yash Raj on 11/01/2024
+    Created by: Yash Raj on 11/01/2025
     """
     def post(self, request):
         serializer = TeacherRegistrationSerializer(data=request.data)

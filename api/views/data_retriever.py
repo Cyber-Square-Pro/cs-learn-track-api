@@ -23,7 +23,7 @@ class CheckUserTypeEndPoint(APIView):
         - 200 OK: If the request is successful.
         - 400 Bad Request: If the JWT token is invalid.
 
-    Created by: Yash Raj on 11/01/2024
+    Created by: Yash Raj on 11/01/2025
     """
 
     authentication_classes = [JWTAuthentication]
@@ -51,7 +51,7 @@ class ListBatchEndPoint(APIView):
         - 200 OK: If the request is successful.
         - 401 Unauthorized: If the JWT token is invalid or not provided.
 
-    Created by: Yash Raj on 11/01/2024
+    Created by: Yash Raj on 11/01/2025
     """
     authentication_classes = [JWTAuthentication]
     permission_classes = [isTeacher]
@@ -79,7 +79,7 @@ class GetTeacherData(APIView):
         - 200 OK: If the request is successful.
         - 401 Unauthorized: If the JWT token is invalid or not provided.
 
-    Created by: Yash Raj on 11/01/2024
+    Created by: Yash Raj on 11/01/2025
     """
     authentication_classes = [JWTAuthentication]
     permission_classes = [isTeacher]
@@ -112,7 +112,7 @@ class GetStudentData(APIView):
         - 200 OK: If the request is successful.
         - 401 Unauthorized: If the JWT token is invalid or not provided.
 
-    Created by: Yash Raj on 11/01/2024
+    Created by: Yash Raj on 11/01/2025
     """
     authentication_classes = [JWTAuthentication]
     permission_classes = [isStudent]
@@ -149,7 +149,7 @@ class GetTeacherDashboardDetails(APIView):
         - 200 OK: If the request is successful with the total number of students, active teachers, and last 3 active students.
         - 401 Unauthorized: If the JWT token is invalid or not provided.
 
-    Created by: Yash Raj on 13/01/2024
+    Created by: Yash Raj on 13/01/2025
     """
     authentication_classes = [JWTAuthentication]
     permission_classes = [isTeacher]

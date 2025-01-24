@@ -25,7 +25,7 @@ class RegenerateAccessToken(APIView):
         - 200 OK: If the token is successfully regenerated.
         - 400 Bad Request: If the provided token is invalid.
 
-    Created by: Yash Raj on 22/01/2024
+    Created by: Yash Raj on 22/01/2025
     """
     def post(self, request):
         refresh_token = request.data.get("refresh")
@@ -57,7 +57,7 @@ class AdminSignInEndPoint(APIView):
                 - 400 Bad Request if the data is invalid or if the admin does not exist.
                 - 400 Bad Request if the password is incorrect.
     
-    Created by: Yash Raj on 11/01/2024
+    Created by: Yash Raj on 11/01/2025
     """
     def post(self, request):
         serializer = AdminDataSerializer(data = request.data)
@@ -91,7 +91,7 @@ class StudentLoginEndPoint(APIView):
         - 400 Bad Request: If the provided data is invalid, the student does not exist, 
           or the password is incorrect.
     
-    Created by: Yash Raj on 11/01/2024
+    Created by: Yash Raj on 11/01/2025
     """
     def post(self, request):
         admission_no = request.data.get("admissionNo")
@@ -139,7 +139,7 @@ class TeacherLoginEndPoint(APIView):
         - 400 Bad Request: If the provided data is invalid, the teacher does not exist, 
             or the password is incorrect.
 
-    Created by: Yash Raj on 11/01/2024
+    Created by: Yash Raj on 11/01/2025
     """
     def post(self, request):
         email = request.data.get("email")
@@ -186,7 +186,7 @@ class LogoutEndPoint(APIView):
         - 200 OK: If the user is successfully logged out.
         - 400 Bad Request: If the token is invalid or not provided.
 
-    Created by: Yash Raj on 14/01/2024
+    Created by: Yash Raj on 14/01/2025
     """
 
     authentication_classes = [JWTAuthentication]
@@ -207,3 +207,33 @@ class LogoutEndPoint(APIView):
         userProfile.save()
 
         return Response({"message": "Logged out successfully", "status": status.HTTP_200_OK})
+
+class ValidateRefreshToken(APIView):
+    """
+    API endpoint to validate a refresh token.
+
+    This endpoint handles POST requests to validate a refresh token.
+    It checks if the provided refresh token is valid.
+
+    Methods:
+        post(request): 
+            Handles the token validation process. It expects a JSON payload with 
+            'refresh'. If the token is valid, it returns a success message; otherwise, 
+            it returns an appropriate error message.
+
+    Responses:
+        - 200 OK: If the token is valid.
+        - 400 Bad Request: If the provided token is invalid.
+
+    Created by: Yash Raj on 24/01/2025
+    """
+    def post(self, request):
+        refresh_token = request.data.get("refresh")
+        if refresh_token:
+            try:
+                token = RefreshToken(refresh_token)
+                token.check_blacklist()
+                return Response({"message": "Token is valid", "status": status.HTTP_200_OK})
+            except Exception as e:
+                return Response({"message": "Invalid token", "status": status.HTTP_400_BAD_REQUEST, "error": str(e)})
+        return Response({"message": "Invalid token", "status": status.HTTP_400_BAD_REQUEST})
