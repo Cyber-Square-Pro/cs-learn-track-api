@@ -198,7 +198,10 @@ class GetStudentList(APIView):
         if not batchID:
             return Response({"message": "Batch ID is required", "status": status.HTTP_400_BAD_REQUEST})
         
-        students = StudentData.objects.filter(batch=batchID)
+        if request.data.get("showDeletedStudents") == "true":
+            students = StudentData.objects.filter(batch=batchID)
+        else:
+            students = StudentData.objects.filter(batch=batchID, accountStatus=True)
 
         student_list = [
             {
@@ -207,6 +210,7 @@ class GetStudentList(APIView):
                 "rollNo": student.rollNo,
                 "studentClass": student.studentClass,
                 "profilePic": student.profilePic.url if student.profilePic else None,
+                "accountStatus": student.accountStatus
             }
             for student in students
         ]

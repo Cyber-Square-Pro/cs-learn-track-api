@@ -110,7 +110,7 @@ class RegisterStudentEndPoint(APIView):
             role="student"
         )
         # Update roll numbers in the batch
-        students_in_batch = StudentData.objects.filter(batch=batch).order_by('studentName')
+        students_in_batch = StudentData.objects.filter(batch=batch, accountStatus=True).order_by('studentName')
         for index, student in enumerate(students_in_batch, start=1):
             student.rollNo = index
             student.save()
