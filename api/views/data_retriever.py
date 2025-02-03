@@ -172,3 +172,41 @@ class GetTeacherDashboardDetails(APIView):
             recent_students_details.append(student_data)
 
         return Response({"total_students": total_students, "active_students": active_students, "recent_students_details": recent_students_details, "status": status.HTTP_200_OK})
+
+class GetStudentList(APIView):
+    """
+    API endpoint to get the list of all students.
+
+    This endpoint handles POST requests and returns the list of all students.
+
+    Methods:
+        post(request):
+            Returns the list of all students in the teacher's batch.
+
+    Responses:
+        - 200 OK: If the request is successful with the list of all students.
+        - 401 Unauthorized: If the JWT token is invalid or not provided.
+
+    Created by: Yash Raj on 03/02/2025
+    """
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [isTeacher]
+
+    def post(self, request):
+        userProfile = UserProfile.objects.get(user_id=request.user.id)
+        teacher = Teacher.objects.get(id=userProfile.dbUniqueID)
+        students = StudentData.objects.filter(batch=teacher.batch)
+
+        student_list = [
+            {
+                "admissionNo": student.admissionNo,
+                "studentName": student.studentName,
+                "rollNo": student.rollNo,
+                "studentClass": student.studentClass,
+                "profilePic": student.profilePic.url if student.profilePic else None,
+            }
+            for student in students
+        ]
+
+        return Response({"students": student_list, "status": status.HTTP_200_OK})
