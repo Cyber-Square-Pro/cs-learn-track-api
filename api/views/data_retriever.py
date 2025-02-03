@@ -181,7 +181,7 @@ class GetStudentList(APIView):
 
     Methods:
         post(request):
-            Returns the list of all students in the teacher's batch.
+            Returns the list of all students in the given batch.
 
     Responses:
         - 200 OK: If the request is successful with the list of all students.
@@ -194,9 +194,11 @@ class GetStudentList(APIView):
     permission_classes = [isTeacher]
 
     def post(self, request):
-        userProfile = UserProfile.objects.get(user_id=request.user.id)
-        teacher = Teacher.objects.get(id=userProfile.dbUniqueID)
-        students = StudentData.objects.filter(batch=teacher.batch)
+        batchID = request.data.get("batchID")
+        if not batchID:
+            return Response({"message": "Batch ID is required", "status": status.HTTP_400_BAD_REQUEST})
+        
+        students = StudentData.objects.filter(batch=batchID)
 
         student_list = [
             {
