@@ -9,3 +9,8 @@ class ClearDatabaseView(APIView):
         for model in [StudentData, Batch, Teacher, UserProfile, User]:
             model.objects.all().delete()
         return Response({"message": "All data cleared successfully."}, status=status.HTTP_200_OK)
+    
+
+class TestView(APIView):
+    def get(self, request):
+        return Response({"message": "Test successful."}, status=status.HTTP_200_OK)
