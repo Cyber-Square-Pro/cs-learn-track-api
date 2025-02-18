@@ -13,4 +13,4 @@ class ClearDatabaseView(APIView):
 
 class TestView(APIView):
     def get(self, request):
-        return Response({"message": "Test successful..."}, status=status.HTTP_200_OK)
+        return Response({"message": "Test successful...."}, status=status.HTTP_200_OK)
