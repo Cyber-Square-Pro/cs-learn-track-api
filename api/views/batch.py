@@ -5,6 +5,7 @@ from api.serializers import *
 from rest_framework import status
 from api.permissions import isTeacher, isStudent
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.contrib.auth.models import User
 
 class GetStudentList(APIView):
     """
@@ -75,8 +76,13 @@ class RemoveStudent(APIView):
             return Response({"error": "admissionNo is required"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             student = StudentData.objects.get(admissionNo=admissionNo)
+            userprofile = UserProfile.objects.get(dbUniqueID=student.admissionNo)
+            auth_user = User.objects.get(id=userprofile.user_id)
             batch = student.batch
             student.delete()
+            userprofile.delete()
+            auth_user.delete()
+            
             batch.reorderstudents()
             return Response({"message": "Student removed from batch"}, status=status.HTTP_200_OK)
         except StudentData.DoesNotExist:
