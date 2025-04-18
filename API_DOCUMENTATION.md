@@ -423,7 +423,7 @@
 
 ---
 
-### POST /batch/list_students/
+### POST /batch/list_batch_students/
 
 **Description**: Retrieves the list of students in a given batch. Only accessible by teachers.
 
@@ -443,6 +443,34 @@
   "batch": "Batch A",
   "students": [
     {"name": "John Doe", "rollNo": 1, "admissionNo": 1001}
+  ]
+}
+```
+
+**Authentication Required**: Yes  
+**Authentication Type**: Teacher Token
+
+---
+
+### POST /batch/teacher_student_list/
+
+**Description**: Retrieves the list of all students in batches where the authenticated teacher is in charge.
+
+**Parameters**:
+- **Request Body**: None
+
+**Returns**:
+- **Status**: 200 OK (others: 404 Not Found)
+- **Response Example**:
+```json
+{
+  "students": [
+    {
+      "name": "John Doe",
+      "rollNo": 1,
+      "admissionNo": 1001,
+      "batch": "Batch A"
+    }
   ]
 }
 ```
@@ -476,3 +504,4 @@
 **Authentication Required**: Yes  
 **Authentication Type**: Teacher Token
 
+---

@@ -7,14 +7,15 @@ from api.permissions import isTeacher, isStudent
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.auth.models import User
 
-class GetStudentList(APIView):
+
+class GetBatchStudentList(APIView):
     """
     API endpoint to retrieve the list of students in a given batch.
 
     This endpoint handles POST requests and returns the batch name along with a list of students.
 
     Methods:
-        post(request): 
+        post(request):
             Expects 'batch_id' in the request data and returns the batch name and its students.
 
     Responses:
@@ -25,16 +26,19 @@ class GetStudentList(APIView):
 
     Created by: Yash Raj on 15/04/2025
     """
+
     authentication_classes = [JWTAuthentication]
     permission_classes = [isTeacher]
 
     def post(self, request):
-        batch_id = request.data.get('batch_id')
+        batch_id = request.data.get("batch_id")
         if not batch_id:
-            return Response({"error": "batch_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "batch_id is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
         try:
             batch = Batch.objects.get(id=batch_id)
-            students = StudentData.objects.filter(batch=batch).order_by('rollNo')
+            students = StudentData.objects.filter(batch=batch).order_by("rollNo")
             data = {
                 "batch": batch.batchName,
                 "students": [
@@ -42,12 +46,63 @@ class GetStudentList(APIView):
                         "name": student.studentName,
                         "rollNo": student.rollNo,
                         "admissionNo": student.admissionNo,
-                    } for student in students
-                ]
+                    }
+                    for student in students
+                ],
             }
             return Response(data, status=status.HTTP_200_OK)
         except Batch.DoesNotExist:
-            return Response({"error": "Batch not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Batch not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+
+class GetTeacherStudentList(APIView):
+    """
+    API endpoint to retrieve the list of students for a teacher.
+
+    This endpoint handles POST requests and returns the list of students in batches where the teacher is the incharge.
+
+    Methods:
+        post(request):
+            Returns the list of students in batches where the teacher is the incharge.
+
+    Responses:
+        - 200 OK: If the teacher is found and students are returned.
+        - 404 Not Found: If the teacher does not exist or has no students.
+        - 401 Unauthorized: If the JWT token is invalid or not provided.
+
+    Updated by: Yash Raj on 18/04/2025
+    """
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [isTeacher]
+
+    def post(self, request):
+        try:
+            userProfile = UserProfile.objects.get(user_id=request.user.id)
+            teacher = Teacher.objects.get(id=userProfile.dbUniqueID)
+            batches = Batch.objects.filter(batchIncharge=teacher)
+            student_list = StudentData.objects.filter(batch__in=batches).order_by(
+                "rollNo"
+            )
+            data = {
+                "students": [
+                    {
+                        "name": student.studentName,
+                        "rollNo": student.rollNo,
+                        "admissionNo": student.admissionNo,
+                        "batch": student.batch.batchName,
+                    }
+                    for student in student_list
+                ]
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        except (UserProfile.DoesNotExist, Teacher.DoesNotExist):
+            return Response(
+                {"error": "Teacher not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
 
 class RemoveStudent(APIView):
     """
@@ -56,7 +111,7 @@ class RemoveStudent(APIView):
     This endpoint handles POST requests and removes a student from the specified batch.
 
     Methods:
-        post(request): 
+        post(request):
             Expects 'admissionNo' in the request data and removes the student.
 
     Responses:
@@ -67,13 +122,16 @@ class RemoveStudent(APIView):
 
     Created by: Yash Raj on 15/04/2025
     """
+
     authentication_classes = [JWTAuthentication]
     permission_classes = [isTeacher]
 
     def post(self, request):
-        admissionNo = request.data.get('admissionNo')
+        admissionNo = request.data.get("admissionNo")
         if not admissionNo:
-            return Response({"error": "admissionNo is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "admissionNo is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
         try:
             student = StudentData.objects.get(admissionNo=admissionNo)
             userprofile = UserProfile.objects.get(dbUniqueID=student.admissionNo)
@@ -82,8 +140,12 @@ class RemoveStudent(APIView):
             student.delete()
             userprofile.delete()
             auth_user.delete()
-            
+
             batch.reorderstudents()
-            return Response({"message": "Student removed from batch"}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "Student removed from batch"}, status=status.HTTP_200_OK
+            )
         except StudentData.DoesNotExist:
-            return Response({"error": "Student not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Student not found"}, status=status.HTTP_404_NOT_FOUND
+            )
