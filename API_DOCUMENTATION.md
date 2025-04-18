@@ -505,3 +505,41 @@
 **Authentication Type**: Teacher Token
 
 ---
+
+### POST /teacher/get_student_data/
+
+**Description**: Allows a teacher to retrieve detailed data for a specific student by admission number.
+
+**Parameters**:
+- **Request Body**:
+```json
+{
+  "admissionNo": "Student's admission number (integer)"
+}
+```
+
+**Returns**:
+- **Status**: 200 OK (others: 404 Not Found, 403 Forbidden)
+- **Response Example**:
+```json
+{
+  "student_data": {
+    "admissionNo": 1001,
+    "studentName": "John Doe",
+    "rollNo": 1,
+    "studentClass": "10A",
+    "gender": "Male",
+    "fatherName": "Mr. Doe",
+    "email": "john@example.com",
+    "contactNo": "9876543210",
+    "joinedDate": "2025-01-01",
+    "profilePic": "/media/profile_pictures/john.jpg"
+  },
+  "status": 200
+}
+```
+
+**Authentication Required**: Yes  
+**Authentication Type**: Teacher Token
+
+---

@@ -172,3 +172,48 @@ class GetTeacherDashboardDetails(APIView):
             recent_students_details.append(student_data)
 
         return Response({"total_students": total_students, "active_students": active_students, "recent_students_details": recent_students_details, "status": status.HTTP_200_OK})
+
+class TeacherGetStudentData(APIView):
+    """
+    API endpoint for teachers to retrieve all data of a specific student by admission number.
+
+    This endpoint handles POST requests and returns all the data of the student whose admission number is provided in the request body.
+
+    Methods:
+        post(request): 
+            Accepts an "admissionNo" in the request data and returns all data of the corresponding student.
+
+    Responses:
+        - 200 OK: If the student is found and data is returned successfully.
+        - 400 Bad Request: If the admission number is not provided.
+        - 404 Not Found: If no student exists with the given admission number.
+        - 401 Unauthorized: If the JWT token is invalid or not provided.
+
+    Created by: Yash Raj on 18/01/2025
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [isTeacher]
+
+    def post(self, request):
+        admission_num = request.data.get("admissionNo")
+        if not admission_num:
+            return Response({"message": "Admission number is required", "status": status.HTTP_400_BAD_REQUEST})
+        try:
+            student = StudentData.objects.get(admissionNo=admission_num)
+        except StudentData.DoesNotExist:
+            return Response({"message": "Student not found", "status": status.HTTP_404_NOT_FOUND})
+        
+        student_data = {
+            "admissionNo": student.admissionNo,
+            "studentName": student.studentName,
+            "rollNo": student.rollNo,
+            "studentClass": student.studentClass,
+            "gender": student.gender,
+            "fatherName": student.fatherName,
+            "email": student.email,
+            "contactNo": student.contactNo,
+            "joinedDate": student.joinedDate,
+            "studentPassword": student.studentPassword,
+            "profilePic": student.profilePic.url if student.profilePic else None
+        }
+        return Response({"student_data": student_data, "status": status.HTTP_200_OK})

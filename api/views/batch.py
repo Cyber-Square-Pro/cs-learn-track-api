@@ -44,7 +44,7 @@ class GetBatchStudentList(APIView):
                 "students": [
                     {
                         "name": student.studentName,
-                        "rollNo": student.rollNo,
+                        "email": student.email,
                         "admissionNo": student.admissionNo,
                     }
                     for student in students
