@@ -22,3 +22,17 @@ class Batch(models.Model):
         for index, student in enumerate(students_in_batch, start=1):
             student.rollNo = index
             student.save()
+
+
+class Session(models.Model):
+    id = models.AutoField(primary_key=True)
+    sessionName = models.CharField(max_length=50, unique=True)
+    batch = models.ForeignKey(Batch, on_delete=models.CASCADE, related_name='sessions')
+    createdBy = models.ForeignKey(
+        "Teacher", on_delete=models.SET_NULL, null=True, blank=True, related_name='created_sessions'
+    )
+    startDateTime = models.DateTimeField("Start Date Time")
+    endDateTime = models.DateTimeField("End Date Time")
+
+    def __str__(self):
+        return self.sessionName
