@@ -149,3 +149,75 @@ class RemoveStudent(APIView):
             return Response(
                 {"error": "Student not found"}, status=status.HTTP_404_NOT_FOUND
             )
+
+
+class CreateSession(APIView):
+    """
+    API endpoint to create a session for a batch.
+
+    This endpoint handles POST requests and creates a session with the specified details.
+
+    Methods:
+        post(request):
+            Expects 'sessionName', 'batch_id', 'startDateTime', and 'endDateTime' in the request data.
+
+    Responses:
+        - 201 Created: If the session is successfully created.
+        - 400 Bad Request: If any required field is missing or invalid.
+        - 404 Not Found: If the batch does not exist.
+        - 401 Unauthorized: If the JWT token is invalid or not provided.
+
+    Created by: Yash Raj on 24/05/2025
+    """
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [isTeacher]
+
+    def post(self, request):
+        session_name = request.data.get("sessionName")
+        batch_id = request.data.get("batch_id")
+        start_date_time = request.data.get("startDateTime")
+        end_date_time = request.data.get("endDateTime")
+        
+        # Validate required fields
+        if not all([session_name, batch_id, start_date_time, end_date_time]):
+            return Response(
+                {"error": "sessionName, batch_id, startDateTime, and endDateTime are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        try:
+            batch = Batch.objects.get(id=batch_id)
+            
+            userProfile = UserProfile.objects.get(user_id=request.user.id)
+            teacher = Teacher.objects.get(id=userProfile.dbUniqueID)
+
+            # Create session directly
+            session = Session.objects.create(
+                sessionName=session_name,
+                batch=batch,
+                startDateTime=start_date_time,
+                endDateTime=end_date_time,
+                createdBy=teacher
+            )
+            
+            # Return the created session data
+            data = {
+                "id": session.id,
+                "sessionName": session.sessionName,
+                "batch_id": session.batch.id,
+                "startDateTime": session.startDateTime,
+                "endDateTime": session.endDateTime,
+                "createdBy": session.createdBy.username
+            }
+            
+            return Response(data, status=status.HTTP_201_CREATED)
+            
+        except Batch.DoesNotExist:
+            return Response(
+                {"error": "Batch not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_400_BAD_REQUEST
+            )
