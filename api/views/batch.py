@@ -242,7 +242,6 @@ class GetBatchSessions(APIView):
     """
 
     authentication_classes = [JWTAuthentication]
-    permission_classes = [isTeacher]
 
     def post(self, request):
         batch_id = request.data.get("batch_id")
