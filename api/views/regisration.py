@@ -7,6 +7,7 @@ from api.helper import create_user
 from api.permissions import isTeacher
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+
 class BatchCreationEndPoint(APIView):
     """
     API endpoint for batch creation.
@@ -15,7 +16,7 @@ class BatchCreationEndPoint(APIView):
     batch data and saves it to the database.
 
     Methods:
-        post(request): 
+        post(request):
             Handles the batch creation process. It expects a JSON payload with batch details.
             If the data is valid, it creates a new batch and returns a success message.
 
@@ -25,32 +26,41 @@ class BatchCreationEndPoint(APIView):
 
     Created by: Yash Raj on 11/01/2025
     """
+
     authentication_classes = [JWTAuthentication]
     permission_classes = [isTeacher]
-
 
     def post(self, request):
         serializer = BatchCreationSerializer(data=request.data)
         if not serializer.is_valid():
-            return Response({"message": "Invalid data", "status": status.HTTP_400_BAD_REQUEST})
-        
+            return Response(
+                {
+                    "message": "Invalid data",
+                    "errors": serializer.errors,
+                    "status": status.HTTP_400_BAD_REQUEST,
+                }
+            )
+
         userProfile = UserProfile.objects.get(user_id=request.user.id)
         teacher = Teacher.objects.get(id=userProfile.dbUniqueID)
 
         serializer.save(batchIncharge=teacher)
 
-        return Response({"message": "Batch created successfully", "status": status.HTTP_201_CREATED})
+        return Response(
+            {"message": "Batch created successfully", "status": status.HTTP_201_CREATED}
+        )
+
 
 class RegisterStudentEndPoint(APIView):
     """
     API endpoint for student registration.
 
     This endpoint handles POST requests for registering a new student. It validates the provided
-    student data and saves it to the database. The admission number is auto-generated based on the 
+    student data and saves it to the database. The admission number is auto-generated based on the
     last student's admission number in the database.
 
     Methods:
-        post(request): 
+        post(request):
             Handles the student registration process. It expects a JSON payload with student details.
             If the data is valid, it registers the student and returns a success message.
 
@@ -61,24 +71,36 @@ class RegisterStudentEndPoint(APIView):
 
     Created by: Yash Raj on 11/01/2025
     """
+
     authentication_classes = [JWTAuthentication]
     permission_classes = [isTeacher]
 
     def post(self, request):
         serializer = StudentRegistrationSerializer(data=request.data)
         if not serializer.is_valid():
-            return Response({"message": "Invalid data", "errors": serializer.errors, "status": status.HTTP_400_BAD_REQUEST})
-        
+            return Response(
+                {
+                    "message": "Invalid data",
+                    "errors": serializer.errors,
+                    "status": status.HTTP_400_BAD_REQUEST,
+                }
+            )
+
         student_data = serializer.validated_data
 
         # Check if the batch exists
         try:
             batch = Batch.objects.get(id=student_data["batch"].id)
         except Batch.DoesNotExist:
-            return Response({"message": "Batch does not exist", "status": status.HTTP_400_BAD_REQUEST})
+            return Response(
+                {
+                    "message": "Batch does not exist",
+                    "status": status.HTTP_400_BAD_REQUEST,
+                }
+            )
 
         # Generate admission number
-        last_student = StudentData.objects.order_by('admissionNo').last()
+        last_student = StudentData.objects.order_by("admissionNo").last()
         if last_student:
             admission_no = last_student.admissionNo + 1
         else:
@@ -99,7 +121,7 @@ class RegisterStudentEndPoint(APIView):
             # accountStatus=student_data["accountStatus"],
             studentPassword=student_data["studentPassword"],
             batch=batch,
-            profilePic=student_data.get("profilePic")
+            profilePic=student_data.get("profilePic"),
         )
 
         # Create user account
@@ -107,15 +129,19 @@ class RegisterStudentEndPoint(APIView):
             username=student.admissionNo,
             password=student.studentPassword,
             email=student.email,
-            role="student"
+            role="student",
         )
-        # Update roll numbers in the batch
-        students_in_batch = StudentData.objects.filter(batch=batch).order_by('studentName')
-        for index, student in enumerate(students_in_batch, start=1):
-            student.rollNo = index
-            student.save()
+        
+        batch.reorderstudents()
 
-        return Response({"message": "Student registered successfully", "admissionNo": admission_no, "status": status.HTTP_201_CREATED})
+        return Response(
+            {
+                "message": "Student registered successfully",
+                "admissionNo": admission_no,
+                "status": status.HTTP_201_CREATED,
+            }
+        )
+
 
 class RegisterTeacherEndPoint(APIView):
     """
@@ -125,7 +151,7 @@ class RegisterTeacherEndPoint(APIView):
     teacher data and saves it to the database.
 
     Methods:
-        post(request): 
+        post(request):
             Handles the teacher registration process. It expects a JSON payload with teacher details.
             If the data is valid, it registers the teacher and returns a success message.
 
@@ -136,11 +162,18 @@ class RegisterTeacherEndPoint(APIView):
 
     Created by: Yash Raj on 11/01/2025
     """
+
     def post(self, request):
         serializer = TeacherRegistrationSerializer(data=request.data)
         if not serializer.is_valid():
-            return Response({"message": "Invalid data", "errors": serializer.errors, "status": status.HTTP_400_BAD_REQUEST})
-        
+            return Response(
+                {
+                    "message": "Invalid data",
+                    "errors": serializer.errors,
+                    "status": status.HTTP_400_BAD_REQUEST,
+                }
+            )
+
         teacher_data = serializer.validated_data
 
         # Save teacher data
@@ -150,7 +183,7 @@ class RegisterTeacherEndPoint(APIView):
             contactNo=teacher_data["contactNo"],
             hireDate=teacher_data["hireDate"],
             teacherPassword=teacher_data["teacherPassword"],
-            profilePic=teacher_data.get("profilePic")
+            profilePic=teacher_data.get("profilePic"),
         )
 
         # Create user account
@@ -158,7 +191,12 @@ class RegisterTeacherEndPoint(APIView):
             username=teacher.id,
             password=teacher.teacherPassword,
             email=teacher.email,
-            role="teacher"
+            role="teacher",
         )
 
-        return Response({"message": "Teacher registered successfully", "status": status.HTTP_201_CREATED})
+        return Response(
+            {
+                "message": "Teacher registered successfully",
+                "status": status.HTTP_201_CREATED,
+            }
+        )

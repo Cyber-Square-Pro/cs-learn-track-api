@@ -5,6 +5,7 @@ from api.serializers import *
 from rest_framework import status
 from api.permissions import isTeacher, isStudent
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from datetime import datetime, timedelta
 
 class CheckUserTypeEndPoint(APIView):
     """
@@ -59,7 +60,9 @@ class ListBatchEndPoint(APIView):
     def post(self, request):
         userProfile = UserProfile.objects.get(user_id=request.user.id)
         teacher = Teacher.objects.get(id=userProfile.dbUniqueID)
-        batches = Batch.objects.filter(batchIncharge=teacher)
+        batches_incharge = Batch.objects.filter(batchIncharge=teacher)
+        batches_teaching = Batch.objects.filter(teachers=teacher)
+        batches = batches_incharge.union(batches_teaching)
         
         batch_list = [{"id": batch.id, "name": batch.batchName} for batch in batches]
         
@@ -171,4 +174,191 @@ class GetTeacherDashboardDetails(APIView):
             }
             recent_students_details.append(student_data)
 
-        return Response({"total_students": total_students, "active_students": active_students, "recent_students_details": recent_students_details, "status": status.HTTP_200_OK})
+        # Get teacher data
+        userProfile = UserProfile.objects.get(user_id=request.user.id)
+        teacher = Teacher.objects.get(id=userProfile.dbUniqueID)
+
+        # Get batches where this teacher is in charge or teaches
+        # batches_incharge = Batch.objects.filter(batchIncharge=teacher)
+        # batches_teaching = Batch.objects.filter(teachers=teacher)
+        # batches = batches_incharge.union(batches_teaching)
+
+        # Get batches where this teacher is in charge
+        batches = Batch.objects.filter(batchIncharge=teacher)
+
+        # Get attendance data for the last 4 days
+
+        # Get the current date
+        current_date = datetime.now().date()
+
+        # Initialize data structure to store attendance percentage for last 4 days
+        attendance_data = []
+
+        # Calculate attendance for each of the last 4 days
+        for i in range(4):
+            day_date = current_date - timedelta(days=i)
+            
+            # Get sessions for this day that are for batches where this teacher is involved
+            sessions = Session.objects.filter(batch__in=batches, startDateTime__date=day_date)
+            
+            # Initialize counters
+            total_attendance_records = 0
+            present_count = 0
+            
+            # Go through each session and count attendance
+            for session in sessions:
+                attendance_records = Attendance.objects.filter(session=session)
+                total_attendance_records += attendance_records.count()
+                present_count += attendance_records.filter(status=True).count()
+            
+            # Calculate percentage (avoid division by zero)
+            attendance_percentage = 0
+            if total_attendance_records > 0:
+                attendance_percentage = (present_count / total_attendance_records) * 100
+            
+            # Add to our data
+            attendance_data.append({
+                "date": day_date.strftime('%d-%m-%Y'),
+                "percentage": round(attendance_percentage, 2)
+            })
+
+        return Response({"total_students": total_students, "active_students": active_students, "recent_students_details": recent_students_details, "attendance_data": attendance_data, "status": status.HTTP_200_OK})
+
+class TeacherGetStudentData(APIView):
+    """
+    API endpoint for teachers to retrieve all data of a specific student by admission number.
+
+    This endpoint handles POST requests and returns all the data of the student whose admission number is provided in the request body.
+
+    Methods:
+        post(request): 
+            Accepts an "admissionNo" in the request data and returns all data of the corresponding student.
+
+    Responses:
+        - 200 OK: If the student is found and data is returned successfully.
+        - 400 Bad Request: If the admission number is not provided.
+        - 404 Not Found: If no student exists with the given admission number.
+        - 401 Unauthorized: If the JWT token is invalid or not provided.
+
+    Created by: Yash Raj on 18/01/2025
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [isTeacher]
+
+    def post(self, request):
+        admission_num = request.data.get("admissionNo")
+        if not admission_num:
+            return Response({"message": "Admission number is required", "status": status.HTTP_400_BAD_REQUEST})
+        try:
+            student = StudentData.objects.get(admissionNo=admission_num)
+        except StudentData.DoesNotExist:
+            return Response({"message": "Student not found", "status": status.HTTP_404_NOT_FOUND})
+        
+        student_data = {
+            "admissionNo": student.admissionNo,
+            "studentName": student.studentName,
+            "rollNo": student.rollNo,
+            "studentClass": student.studentClass,
+            "gender": student.gender,
+            "fatherName": student.fatherName,
+            "email": student.email,
+            "contactNo": student.contactNo,
+            "joinedDate": student.joinedDate,
+            "studentPassword": student.studentPassword,
+            "profilePic": student.profilePic.url if student.profilePic else None
+        }
+        return Response({"student_data": student_data, "status": status.HTTP_200_OK})
+
+class GetSessionAttendace(APIView):
+    """
+    API endpoint to get the attendance of a specific session.
+
+    This endpoint handles POST requests and returns the attendance details of the session specified by its ID.
+
+    Methods:
+        post(request): 
+            Accepts a "sessionId" in the request data and returns the attendance details for that session.
+
+    Responses:
+        - 200 OK: If the session is found and attendance data is returned successfully.
+        - 400 Bad Request: If the session ID is not provided.
+        - 404 Not Found: If no session exists with the given ID.
+        - 401 Unauthorized: If the JWT token is invalid or not provided.
+
+    Created by: Yash Raj on 24/05/2025
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [isTeacher]
+
+    def post(self, request):
+        session_id = request.data.get("session_id")
+        if not session_id:
+            return Response({"message": "Session ID is required", "status": status.HTTP_400_BAD_REQUEST})
+        
+        try:
+            session = Session.objects.get(id=session_id)
+        except Session.DoesNotExist:
+            return Response({"message": "Session not found", "status": status.HTTP_404_NOT_FOUND})
+        
+        attendance_records = Attendance.objects.filter(session=session)
+        attendance_data = []
+        
+        for record in attendance_records:
+            student_data = {
+                "admissionNo": record.student.admissionNo,
+                "studentName": record.student.studentName,
+                "status": record.status
+            }
+            attendance_data.append(student_data)
+        
+        return Response({"attendance_data": attendance_data, "status": status.HTTP_200_OK}) 
+
+class GetAttendanceHistory(APIView):
+    """
+    API endpoint to get the attendance history of a specific student.
+
+    This endpoint handles POST requests and returns the attendance history for the student specified by their admission number.
+
+    Methods:
+        post(request): 
+            Accepts an "admissionNo" in the request data if a teacher else none and returns the attendance history for that student.
+
+    Responses:
+        - 200 OK: If the student is found and attendance history is returned successfully.
+        - 400 Bad Request: If the admission number is not provided.
+        - 404 Not Found: If no student exists with the given admission number.
+        - 401 Unauthorized: If the JWT token is invalid or not provided.
+
+    Created by: Yash Raj on 24/05/2025
+    """
+    authentication_classes = [JWTAuthentication]
+
+    def post(self, request):
+        data = request.data
+
+        admission_no = None
+        userProfile = UserProfile.objects.get(user_id=request.user.id)
+        if userProfile.role == 'teacher':
+            admission_no = data.get('admission_no')
+            if not admission_no:
+                return Response({"error": "admission_no is required as you are a teacher"}, status=status.HTTP_400_BAD_REQUEST)
+        elif userProfile.role == 'student':
+            admission_no = userProfile.dbUniqueID
+        student = StudentData.objects.filter(admissionNo=admission_no).first()
+        if not student:
+            return Response({"error": "Student not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        attendance_records = Attendance.objects.filter(student=student)
+        attendance_history = []
+        
+        for record in attendance_records:
+            session = record.session
+            session_data = {
+                "sessionName": session.sessionName,
+                "startDateTime": session.startDateTime,
+                "endDateTime": session.endDateTime,
+                "status": record.status
+            }
+            attendance_history.append(session_data)
+        
+        return Response({"attendance_history": attendance_history, "status": status.HTTP_200_OK})
