@@ -36,3 +36,16 @@ class Session(models.Model):
 
     def __str__(self):
         return self.sessionName
+
+
+class Attendance(models.Model):
+    id = models.AutoField(primary_key=True)
+    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='attendances')
+    student = models.ForeignKey(StudentData, on_delete=models.CASCADE, related_name='attendances')
+    status = models.BooleanField("Attendance Status", default=False)
+
+    class Meta:
+        unique_together = ('session', 'student')
+
+    def __str__(self):
+        return f"{self.student} - {self.session} - {'Present' if self.status else 'Absent'}"
