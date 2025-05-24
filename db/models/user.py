@@ -33,6 +33,7 @@ class StudentData(models.Model):
 	batch = models.ForeignKey("Batch", on_delete=models.CASCADE, related_name='students')
 	createdAt = models.DateTimeField("Created At", auto_now_add=True)
 	profilePic = models.ImageField("Profile Picture", upload_to='profile_pictures/', blank=True, null=True)
+	faceEncoding = models.BinaryField("Face Encoding", blank=True, null=True)
 
 	def __str__(self):
 		return self.studentName

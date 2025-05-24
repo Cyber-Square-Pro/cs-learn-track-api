@@ -1,5 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from api.permissions import isStudent
 from db.models import *
 from api.serializers import *
 from rest_framework import status
@@ -7,7 +8,11 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
-
+import face_recognition
+import numpy as np
+from PIL import Image
+import io
+import base64
 
 class AdminSignInEndPoint(APIView):
     """
@@ -209,3 +214,147 @@ class RegenerateAccessToken(APIView):
             except Exception as e:
                 return Response({"message": "Invalid token", "status": status.HTTP_400_BAD_REQUEST})
         return Response({"message": "Invalid token", "status": status.HTTP_400_BAD_REQUEST})
+
+
+class AddFaceEncodingEndPoint(APIView):
+    """
+    API endpoint to add face encoding.
+
+    This endpoint handles POST requests to add face encoding for a user. It expects
+    a JSON payload with 'face_image'. If the data is valid, it saves
+    the face encoding to the database.
+
+    Methods:
+        post(request): 
+            Handles the addition of face encoding. It expects a JSON payload with 
+            'face_image'. If successful, it returns a success message; 
+            otherwise, it returns an appropriate error message.
+
+    Responses:
+        - 200 OK: If the face encoding is successfully added.
+        - 400 Bad Request: If the provided data is invalid or if the user does not exist.
+
+    Created by: Yash Raj on 24/05/2025
+    """
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [isStudent]
+
+    def post(self, request):
+        user_profile = UserProfile.objects.get(user_id=request.user.id)
+        if user_profile.role != "student":
+            return Response({"message": "Only students can add face encoding", "status": status.HTTP_403_FORBIDDEN})
+        student = StudentData.objects.get(admissionNo=user_profile.dbUniqueID)
+
+        face_recognition_image = request.data.get("face_image")
+        if not face_recognition_image:
+            return Response({"message": "Face image is required", "status": status.HTTP_400_BAD_REQUEST})
+        
+        try:
+            # For base64 string handling
+            # If the string contains a prefix like "data:image/jpeg;base64,"
+            if ';base64,' in face_recognition_image:
+                format, imgstr = face_recognition_image.split(';base64,')
+                image_data = base64.b64decode(imgstr)
+            else:
+                # If it's just the base64 string without the prefix
+                image_data = base64.b64decode(face_recognition_image)
+            
+            # Convert to PIL Image
+            image = Image.open(io.BytesIO(image_data))
+            
+            # Convert to numpy array for face_recognition
+            image_array = np.array(image)
+            
+            # Detect faces in the image
+            face_locations = face_recognition.face_locations(image_array)
+            if not face_locations:
+                return Response({"message": "No face detected in the image", "status": status.HTTP_400_BAD_REQUEST})
+            
+            # Get the encoding for the first face found
+            face_encoding = face_recognition.face_encodings(image_array, face_locations)[0]
+            
+            # Convert numpy array to binary for database storage
+            face_encoding_binary = face_encoding.tobytes()
+            
+            # Save the encoding to the student record
+            student.faceEncoding = face_encoding_binary
+            student.save()
+            
+            return Response({"message": "Face encoding added successfully", "status": status.HTTP_200_OK})
+            
+        except Exception as e:
+            return Response({
+                "message": "Error processing face image", 
+                "error": str(e),
+                "status": status.HTTP_400_BAD_REQUEST
+            })
+
+class LoginFaceEndPoint(APIView):
+    def post(self, request):
+        admission_no = request.data.get("admissionNo")
+        if not admission_no:
+            return Response({"message": "Admission number is required", "status": status.HTTP_400_BAD_REQUEST})
+        
+        student = StudentData.objects.filter(admissionNo=admission_no).first()
+        if not student:
+            return Response({"message": "Student does not exist", "status": status.HTTP_400_BAD_REQUEST})
+
+        auth_encoding_binary = student.faceEncoding
+        if not auth_encoding_binary:
+            return Response({"message": "Face encoding not found for the student", "status": status.HTTP_400_BAD_REQUEST})
+
+        login_image = request.data.get("login_image")
+        if not login_image:
+            return Response({"message": "Face image is required", "status": status.HTTP_400_BAD_REQUEST})
+        
+        try:
+            # For base64 string handling
+            # If the string contains a prefix like "data:image/jpeg;base64,"
+            if ';base64,' in login_image:
+                format, imgstr = login_image.split(';base64,')
+                image_data = base64.b64decode(imgstr)
+            else:
+                # If it's just the base64 string without the prefix
+                image_data = base64.b64decode(login_image)
+
+             # Convert to PIL Image
+            image = Image.open(io.BytesIO(image_data))
+            
+            # Convert to numpy array for face_recognition
+            image_array = np.array(image)
+            
+            # Detect faces in the image
+            face_locations = face_recognition.face_locations(image_array)
+            if not face_locations:
+                return Response({"message": "No face detected in the image", "status": status.HTTP_400_BAD_REQUEST})
+            
+            # Get the encoding for the first face found
+            face_encoding = face_recognition.face_encodings(image_array, face_locations)[0]
+            auth_encoding = np.frombuffer(auth_encoding_binary, dtype=np.float64)
+
+            results = face_recognition.compare_faces([face_encoding], auth_encoding)
+
+            if results[0]:
+                userProfile = UserProfile.objects.filter(role="student").get(dbUniqueID=student.admissionNo)
+                user = User.objects.get(id=userProfile.user_id)
+                userProfile.active = True
+                userProfile.save()
+
+                refresh = RefreshToken.for_user(user)
+                return Response({
+                    "message": "Student logged in successfully",
+                    "name": student.studentName,
+                    "status": status.HTTP_200_OK,
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token)
+                })
+            else:
+                return Response({"message": "Face does not match", "status": status.HTTP_400_BAD_REQUEST})
+        except Exception as e:
+            return Response({
+                "message": "Error processing face image", 
+                "error": str(e),
+                "status": status.HTTP_400_BAD_REQUEST
+            })
+            
