@@ -17,7 +17,7 @@ class UpdateStudentData(APIView):
 
         admission_no = None
 
-        userProfile = UserProfile.objects.get(user_id=data.id)
+        userProfile = UserProfile.objects.get(user_id=request.user.id)
         if userProfile.role == 'teacher':
             admission_no = data.get('admission_no')
             if not admission_no:

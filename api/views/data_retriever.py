@@ -312,3 +312,53 @@ class GetSessionAttendace(APIView):
             attendance_data.append(student_data)
         
         return Response({"attendance_data": attendance_data, "status": status.HTTP_200_OK}) 
+
+class GetAttendanceHistory(APIView):
+    """
+    API endpoint to get the attendance history of a specific student.
+
+    This endpoint handles POST requests and returns the attendance history for the student specified by their admission number.
+
+    Methods:
+        post(request): 
+            Accepts an "admissionNo" in the request data if a teacher else none and returns the attendance history for that student.
+
+    Responses:
+        - 200 OK: If the student is found and attendance history is returned successfully.
+        - 400 Bad Request: If the admission number is not provided.
+        - 404 Not Found: If no student exists with the given admission number.
+        - 401 Unauthorized: If the JWT token is invalid or not provided.
+
+    Created by: Yash Raj on 24/05/2025
+    """
+    authentication_classes = [JWTAuthentication]
+
+    def post(self, request):
+        data = request.data
+
+        admission_no = None
+        userProfile = UserProfile.objects.get(user_id=request.user.id)
+        if userProfile.role == 'teacher':
+            admission_no = data.get('admission_no')
+            if not admission_no:
+                return Response({"error": "admission_no is required as you are a teacher"}, status=status.HTTP_400_BAD_REQUEST)
+        elif userProfile.role == 'student':
+            admission_no = userProfile.dbUniqueID
+        student = StudentData.objects.filter(admissionNo=admission_no).first()
+        if not student:
+            return Response({"error": "Student not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        attendance_records = Attendance.objects.filter(student=student)
+        attendance_history = []
+        
+        for record in attendance_records:
+            session = record.session
+            session_data = {
+                "sessionName": session.sessionName,
+                "startDateTime": session.startDateTime,
+                "endDateTime": session.endDateTime,
+                "status": record.status
+            }
+            attendance_history.append(session_data)
+        
+        return Response({"attendance_history": attendance_history, "status": status.HTTP_200_OK})
