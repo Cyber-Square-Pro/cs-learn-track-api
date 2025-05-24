@@ -264,7 +264,7 @@ class GetBatchSessions(APIView):
 
     Methods:
         post(request):
-            Expects 'batch_id' in the request data and returns the list of sessions.
+            Expects 'batch_id' in the request data if a teacher else none and returns the list of sessions.
 
     Responses:
         - 200 OK: If the batch is found and sessions are returned.
@@ -278,11 +278,24 @@ class GetBatchSessions(APIView):
     authentication_classes = [JWTAuthentication]
 
     def post(self, request):
-        batch_id = request.data.get("batch_id")
-        if not batch_id:
-            return Response(
-                {"error": "batch_id is required"}, status=status.HTTP_400_BAD_REQUEST
-            )
+        data = request.data
+
+        batch_id = None
+
+        userProfile = UserProfile.objects.get(user_id=request.user.id)
+        if userProfile.role == 'teacher':
+            batch_id = data.get('batch_id')
+            if not batch_id:
+                return Response({"error": "batch_id is required as you are a teacher"}, status=status.HTTP_400_BAD_REQUEST)
+        elif userProfile.role == 'student':
+            admission_no = userProfile.dbUniqueID
+            student = StudentData.objects.filter(admissionNo=admission_no).first()
+            if not student:
+                return Response(
+                    {"error": "Student not found"}, status=status.HTTP_404_NOT_FOUND
+                )
+            batch_id = student.batch.id if student else None
+
         try:
             batch = Batch.objects.get(id=batch_id)
             sessions = Session.objects.filter(batch=batch).order_by("startDateTime")
