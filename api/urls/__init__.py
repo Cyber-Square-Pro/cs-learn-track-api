@@ -3,11 +3,13 @@ from .data_retriever import urlpatterns as data_retriever_urls
 from .registration import urlpatterns as registration_urls
 from .testing import urlpatterns as testing_urls
 from .batch import url_patterns as batch_urls
+from .update_data import urlpatterns as update_data_urls
 
 urlpatterns = [
     *auth_urls,
     *data_retriever_urls,
     *registration_urls,
     *testing_urls,
-    *batch_urls
+    *batch_urls,
+    *update_data_urls,
 ]

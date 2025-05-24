@@ -3,3 +3,4 @@ from .authentication import *
 from .regisration import *
 from .testing import *
 from .batch import *
+from .update_data import *
