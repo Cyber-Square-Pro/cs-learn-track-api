@@ -1,5 +1,5 @@
 from django.urls import path
-from api.views import GetBatchStudentList, RemoveStudent, GetTeacherStudentList, CreateSession, GetBatchSessions
+from api.views import GetBatchStudentList, RemoveStudent, GetTeacherStudentList, CreateSession, GetBatchSessions, MarkAttendanceEndPoint
 
 url_patterns = [
     path('batch/list_batch_students/', GetBatchStudentList.as_view()),
@@ -7,4 +7,5 @@ url_patterns = [
     path('batch/teacher_student_list/', GetTeacherStudentList.as_view()),
     path('batch/create_session/', CreateSession.as_view()),
     path('batch/get_batch_sessions/', GetBatchSessions.as_view()),
+    path('batch/mark_attendance/', MarkAttendanceEndPoint.as_view()),
 ]

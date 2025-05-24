@@ -305,3 +305,41 @@ class GetBatchSessions(APIView):
             return Response(
                 {"error": "Batch not found"}, status=status.HTTP_404_NOT_FOUND
             )
+
+
+class MarkAttendanceEndPoint(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [isTeacher]
+
+    def post(self, request):
+        session_id = request.data.get("session_id")
+        if not session_id:
+            return Response({"error": "Session ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+        session = Session.objects.filter(id=session_id).first()
+        if not session:
+            return Response({"error": "Session not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        attendance_data = request.data.get("attendance", [])  # List of admission numbers of present students
+        if not attendance_data:
+            return Response({"error": "Attendance data is required"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        # Get batch from the session
+        batch = session.batch
+        if not batch:
+            return Response({"error": "No batch associated with this session"}, status=status.HTTP_404_NOT_FOUND)
+            
+        # Get all students in the batch
+        students = StudentData.objects.filter(batch=batch)
+            
+        # Mark attendance for each student
+        for student in students:
+            # Check if student's admission number is in the list of present students
+            is_present = student.admissionNo in attendance_data
+            
+            # Update or create attendance record
+            Attendance.objects.update_or_create(
+                session=session,
+                student=student,
+                defaults={"status": is_present}
+            )
+        return Response({"message": "Attendance marked successfully"}, status=status.HTTP_200_OK)
