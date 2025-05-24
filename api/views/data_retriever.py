@@ -59,7 +59,9 @@ class ListBatchEndPoint(APIView):
     def post(self, request):
         userProfile = UserProfile.objects.get(user_id=request.user.id)
         teacher = Teacher.objects.get(id=userProfile.dbUniqueID)
-        batches = Batch.objects.filter(batchIncharge=teacher)
+        batches_incharge = Batch.objects.filter(batchIncharge=teacher)
+        batches_teaching = Batch.objects.filter(teachers=teacher)
+        batches = batches_incharge.union(batches_teaching)
         
         batch_list = [{"id": batch.id, "name": batch.batchName} for batch in batches]
         
