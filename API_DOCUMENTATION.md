@@ -2,6 +2,8 @@
 
 ---
 
+## Authentication
+
 ### `POST /student/login/`
 **Auth Required:** No
 
@@ -127,31 +129,7 @@ Status Codes:
 
 ---
 
-### `POST /batch/create/`
-**Auth Required:** Yes — JWT Bearer (teacher)
-
-**Request Body:**
-```json
-{
-  "batchName": "string (required)",
-  "description": "string (optional)"
-}
-```
-Response (201 Created):
-```json
-{
-  "message": "Batch created successfully",
-  "status": 201
-}
-```
-Status Codes:
-
-- 201 Created
-- 400 Bad Request (invalid data)
-- 401 Unauthorized (missing/invalid token)
-- 403 Forbidden (wrong role)
-
----
+## User Management
 
 ### `POST /student/register/`
 **Auth Required:** Yes — JWT Bearer (teacher)
@@ -214,68 +192,6 @@ Status Codes:
 
 - 201 Created
 - 400 Bad Request (invalid data)
-
----
-
-### `POST /database/clear/`
-**Auth Required:** No
-
-**Request Body:**
-```json
-{}
-```
-Response (200 OK):
-```json
-{
-  "message": "All data cleared successfully."
-}
-```
-Status Codes:
-
-- 200 OK
-
----
-
-### `GET /test/`
-**Auth Required:** No
-
-**Request Body:**
-_None_
-
-Response (200 OK):
-```json
-{
-  "message": "Test Succesfull"
-}
-```
-Status Codes:
-
-- 200 OK
-
----
-
-### `POST /batch/list/`
-**Auth Required:** Yes — JWT Bearer (teacher)
-
-**Request Body:**
-```json
-{}
-```
-Response (200 OK):
-```json
-{
-  "batches": [
-    {"id": "integer", "name": "string"},
-    ...
-  ],
-  "status": 200
-}
-```
-Status Codes:
-
-- 200 OK
-- 401 Unauthorized (missing/invalid token)
-- 403 Forbidden (wrong role)
 
 ---
 
@@ -365,43 +281,6 @@ Status Codes:
 
 ---
 
-### `POST /teacher/dashboard/`
-**Auth Required:** Yes — JWT Bearer (teacher)
-
-**Request Body:**
-```json
-{}
-```
-Response (200 OK):
-```json
-{
-  "total_students": "integer",
-  "active_students": "integer",
-  "recent_students_details": [
-    {
-      "admissionNo": "integer",
-      "studentName": "string",
-      "batch": "string",
-      "email": "string",
-      "active": "boolean"
-    },
-    ...
-  ],
-  "attendance_data": [
-    {"date": "string", "percentage": "float"},
-    ...
-  ],
-  "status": 200
-}
-```
-Status Codes:
-
-- 200 OK
-- 401 Unauthorized (missing/invalid token)
-- 403 Forbidden (wrong role)
-
----
-
 ### `POST /teacher/student/data/`
 **Auth Required:** Yes — JWT Bearer (teacher)
 
@@ -440,54 +319,122 @@ Status Codes:
 
 ---
 
-### `POST /session/attendance/`
-**Auth Required:** Yes — JWT Bearer (teacher)
-
-**Request Body:**
-```json
-{
-  "session_id": "integer (required)"
-}
-```
-Response (200 OK):
-```json
-{
-  "attendance_data": [
-    {"admissionNo": "integer", "studentName": "string", "status": "boolean"},
-    ...
-  ],
-  "status": 200
-}
-```
-Status Codes:
-
-- 200 OK
-- 400 Bad Request (missing session_id)
-- 404 Not Found (session not found)
-- 401 Unauthorized (missing/invalid token)
-- 403 Forbidden (wrong role)
-
----
-
-### `POST /attendance/history/`
+### `POST /student/update/`
 **Auth Required:** Yes — JWT Bearer (teacher/student)
 
 **Request Body:**
 ```json
 {
-  "admission_no": "integer (required for teacher, ignored for student)"
+  "admission_no": "integer (required for teacher, ignored for student)",
+  "studentName": "string (optional)",
+  "gender": "string (optional)",
+  "fatherName": "string (optional)",
+  "email": "string (optional)",
+  "contactNo": "string (optional)",
+  "joinedDate": "date (optional)",
+  "studentPassword": "string (optional)",
+  "profilePic": "file (optional)"
 }
 ```
 Response (200 OK):
 ```json
 {
-  "attendance_history": [
-    {
-      "sessionName": "string",
-      "startDateTime": "datetime",
-      "endDateTime": "datetime",
-      "status": "boolean"
-    },
+  "admissionNo": "integer",
+  "studentName": "string",
+  "rollNo": "integer",
+  "studentClass": "string",
+  "division": "string",
+  "gender": "string",
+  "fatherName": "string",
+  "email": "string",
+  "contactNo": "string",
+  "joinedDate": "date",
+  "accountStatus": "boolean",
+  "studentPassword": "string",
+  "batch": "integer",
+  "createdAt": "datetime",
+  "profilePic": "string|null"
+}
+```
+Status Codes:
+
+- 200 OK
+- 400 Bad Request (invalid data, missing admission_no for teacher)
+- 404 Not Found (student not found)
+- 401 Unauthorized (missing/invalid token)
+
+---
+
+### `POST /teacher/update/`
+**Auth Required:** Yes — JWT Bearer (teacher)
+
+**Request Body:**
+```json
+{
+  "name": "string (optional)",
+  "subject": "string (optional)",
+  "contactNo": "string (optional)",
+  "profilePic": "file (optional)"
+}
+```
+Response (200 OK):
+```json
+{
+  "name": "string",
+  "subject": "string",
+  "contactNo": "string",
+  "profilePic": "string|null"
+}
+```
+Status Codes:
+
+- 200 OK
+- 400 Bad Request (invalid data)
+- 404 Not Found (teacher not found)
+- 401 Unauthorized (missing/invalid token)
+
+---
+
+## Batch Management
+
+### `POST /batch/create/`
+**Auth Required:** Yes — JWT Bearer (teacher)
+
+**Request Body:**
+```json
+{
+  "batchName": "string (required)",
+  "description": "string (optional)"
+}
+```
+Response (201 Created):
+```json
+{
+  "message": "Batch created successfully",
+  "status": 201
+}
+```
+Status Codes:
+
+- 201 Created
+- 400 Bad Request (invalid data)
+- 401 Unauthorized (missing/invalid token)
+- 403 Forbidden (wrong role)
+
+---
+
+### `POST /batch/list/`
+**Auth Required:** Yes — JWT Bearer (teacher)
+
+**Request Body:**
+```json
+{}
+```
+Response (200 OK):
+```json
+{
+  "batches": [
+    {"id": "integer", "name": "string"},
     ...
   ],
   "status": 200
@@ -496,9 +443,8 @@ Response (200 OK):
 Status Codes:
 
 - 200 OK
-- 400 Bad Request (missing admission_no for teacher)
-- 404 Not Found (student not found)
 - 401 Unauthorized (missing/invalid token)
+- 403 Forbidden (wrong role)
 
 ---
 
@@ -581,6 +527,43 @@ Status Codes:
 
 ---
 
+### `POST /batch/update/`
+**Auth Required:** Yes — JWT Bearer (teacher)
+
+**Request Body:**
+```json
+{
+  "batch_id": "integer (required)",
+  "batchName": "string (optional)",
+  "description": "string (optional)",
+  "batchStatus": "boolean (optional)",
+  "batchIncharge": "integer (optional)",
+  "teachers": ["integer", ...] (optional)
+}
+```
+Response (200 OK):
+```json
+{
+  "id": "integer",
+  "batchName": "string",
+  "description": "string",
+  "batchStatus": "boolean",
+  "createdAt": "datetime",
+  "batchIncharge": "integer|null",
+  "teachers": ["integer", ...]
+}
+```
+Status Codes:
+
+- 200 OK
+- 400 Bad Request (invalid data, missing batch_id)
+- 404 Not Found (batch not found)
+- 401 Unauthorized (missing/invalid token)
+
+---
+
+## Session Management
+
 ### `POST /batch/create_session/`
 **Auth Required:** Yes — JWT Bearer (teacher)
 
@@ -649,113 +632,6 @@ Status Codes:
 
 ---
 
-### `POST /batch/mark_attendance/`
-**Auth Required:** Yes — JWT Bearer (teacher)
-
-**Request Body:**
-```json
-{
-  "session_id": "integer (required)",
-  "attendance": ["integer", ...] (required, list of admission numbers present)
-}
-```
-Response (200 OK):
-```json
-{
-  "message": "Attendance marked successfully"
-}
-```
-Status Codes:
-
-- 200 OK
-- 400 Bad Request (missing session_id or attendance data)
-- 404 Not Found (session or batch not found)
-- 401 Unauthorized (missing/invalid token)
-- 403 Forbidden (wrong role)
-
----
-
-### `POST /student/update/`
-**Auth Required:** Yes — JWT Bearer (teacher/student)
-
-**Request Body:**
-```json
-{
-  "admission_no": "integer (required for teacher, ignored for student)",
-  "studentName": "string (optional)",
-  "gender": "string (optional)",
-  "fatherName": "string (optional)",
-  "email": "string (optional)",
-  "contactNo": "string (optional)",
-  "joinedDate": "date (optional)",
-  "studentPassword": "string (optional)",
-  "profilePic": "file (optional)"
-}
-```
-Response (200 OK):
-```json
-{
-  "admissionNo": "integer",
-  "studentName": "string",
-  "rollNo": "integer",
-  "studentClass": "string",
-  "division": "string",
-  "gender": "string",
-  "fatherName": "string",
-  "email": "string",
-  "contactNo": "string",
-  "joinedDate": "date",
-  "accountStatus": "boolean",
-  "studentPassword": "string",
-  "batch": "integer",
-  "createdAt": "datetime",
-  "profilePic": "string|null"
-}
-```
-Status Codes:
-
-- 200 OK
-- 400 Bad Request (invalid data, missing admission_no for teacher)
-- 404 Not Found (student not found)
-- 401 Unauthorized (missing/invalid token)
-
----
-
-### `POST /batch/update/`
-**Auth Required:** Yes — JWT Bearer (teacher)
-
-**Request Body:**
-```json
-{
-  "batch_id": "integer (required)",
-  "batchName": "string (optional)",
-  "description": "string (optional)",
-  "batchStatus": "boolean (optional)",
-  "batchIncharge": "integer (optional)",
-  "teachers": ["integer", ...] (optional)
-}
-```
-Response (200 OK):
-```json
-{
-  "id": "integer",
-  "batchName": "string",
-  "description": "string",
-  "batchStatus": "boolean",
-  "createdAt": "datetime",
-  "batchIncharge": "integer|null",
-  "teachers": ["integer", ...]
-}
-```
-Status Codes:
-
-- 200 OK
-- 400 Bad Request (invalid data, missing batch_id)
-- 404 Not Found (batch not found)
-- 401 Unauthorized (missing/invalid token)
-
----
-
 ### `POST /session/update/`
 **Auth Required:** Yes — JWT Bearer (teacher)
 
@@ -789,33 +665,171 @@ Status Codes:
 
 ---
 
-### `POST /teacher/update/`
+## Attendance Management
+
+### `POST /session/attendance/`
 **Auth Required:** Yes — JWT Bearer (teacher)
 
 **Request Body:**
 ```json
 {
-  "name": "string (optional)",
-  "subject": "string (optional)",
-  "contactNo": "string (optional)",
-  "profilePic": "file (optional)"
+  "session_id": "integer (required)"
 }
 ```
 Response (200 OK):
 ```json
 {
-  "name": "string",
-  "subject": "string",
-  "contactNo": "string",
-  "profilePic": "string|null"
+  "attendance_data": [
+    {"admissionNo": "integer", "studentName": "string", "status": "boolean"},
+    ...
+  ],
+  "status": 200
 }
 ```
 Status Codes:
 
 - 200 OK
-- 400 Bad Request (invalid data)
-- 404 Not Found (teacher not found)
+- 400 Bad Request (missing session_id)
+- 404 Not Found (session not found)
 - 401 Unauthorized (missing/invalid token)
+- 403 Forbidden (wrong role)
+
+---
+
+### `POST /attendance/history/`
+**Auth Required:** Yes — JWT Bearer (teacher/student)
+
+**Request Body:**
+```json
+{
+  "admission_no": "integer (required for teacher, ignored for student)"
+}
+```
+Response (200 OK):
+```json
+{
+  "attendance_history": [
+    {
+      "sessionName": "string",
+      "startDateTime": "datetime",
+      "endDateTime": "datetime",
+      "status": "boolean"
+    },
+    ...
+  ],
+  "status": 200
+}
+```
+Status Codes:
+
+- 200 OK
+- 400 Bad Request (missing admission_no for teacher)
+- 404 Not Found (student not found)
+- 401 Unauthorized (missing/invalid token)
+
+---
+
+### `POST /batch/mark_attendance/`
+**Auth Required:** Yes — JWT Bearer (teacher)
+
+**Request Body:**
+```json
+{
+  "session_id": "integer (required)",
+  "attendance": ["integer", ...] (required, list of admission numbers present)
+}
+```
+Response (200 OK):
+```json
+{
+  "message": "Attendance marked successfully"
+}
+```
+Status Codes:
+
+- 200 OK
+- 400 Bad Request (missing session_id or attendance data)
+- 404 Not Found (session or batch not found)
+- 401 Unauthorized (missing/invalid token)
+- 403 Forbidden (wrong role)
+
+---
+
+## Dashboards
+
+### `POST /teacher/dashboard/`
+**Auth Required:** Yes — JWT Bearer (teacher)
+
+**Request Body:**
+```json
+{}
+```
+Response (200 OK):
+```json
+{
+  "total_students": "integer",
+  "active_students": "integer",
+  "recent_students_details": [
+    {
+      "admissionNo": "integer",
+      "studentName": "string",
+      "batch": "string",
+      "email": "string",
+      "active": "boolean"
+    },
+    ...
+  ],
+  "attendance_data": [
+    {"date": "string", "percentage": "float"},
+    ...
+  ],
+  "status": 200
+}
+```
+Status Codes:
+
+- 200 OK
+- 401 Unauthorized (missing/invalid token)
+- 403 Forbidden (wrong role)
+
+---
+
+## Administration & Testing
+
+### `POST /database/clear/`
+**Auth Required:** No
+
+**Request Body:**
+```json
+{}
+```
+Response (200 OK):
+```json
+{
+  "message": "All data cleared successfully."
+}
+```
+Status Codes:
+
+- 200 OK
+
+---
+
+### `GET /test/`
+**Auth Required:** No
+
+**Request Body:**
+_None_
+
+Response (200 OK):
+```json
+{
+  "message": "Test Succesfull"
+}
+```
+Status Codes:
+
+- 200 OK
 
 ---
 
