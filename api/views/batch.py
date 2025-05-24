@@ -6,6 +6,7 @@ from rest_framework import status
 from api.permissions import isTeacher, isStudent
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 
 class GetBatchStudentList(APIView):
@@ -164,6 +165,7 @@ class CreateSession(APIView):
     Responses:
         - 201 Created: If the session is successfully created.
         - 400 Bad Request: If any required field is missing or invalid.
+        - 409 Conflict: If the session conflicts with an existing session.
         - 404 Not Found: If the batch does not exist.
         - 401 Unauthorized: If the JWT token is invalid or not provided.
 
@@ -188,6 +190,38 @@ class CreateSession(APIView):
             
         try:
             batch = Batch.objects.get(id=batch_id)
+            
+            # Check for schedule conflicts
+            conflicts = Session.objects.filter(
+                batch=batch,
+                # Find overlapping sessions:
+                # - New session starts during an existing session
+                # - New session ends during an existing session
+                # - New session completely encloses an existing session
+                # - New session is completely enclosed by an existing session
+            ).filter(
+                    # This checks for overlapping sessions but excludes exactly adjacent sessions
+                    (Q(startDateTime__lt=end_date_time) & Q(endDateTime__gt=start_date_time)) & 
+                    ~(Q(startDateTime=end_date_time) | Q(endDateTime=start_date_time))
+            )
+            
+            if conflicts.exists():
+                conflicting_sessions = [
+                    {
+                        "id": session.id,
+                        "sessionName": session.sessionName,
+                        "startDateTime": session.startDateTime,
+                        "endDateTime": session.endDateTime,
+                    }
+                    for session in conflicts
+                ]
+                return Response(
+                    {
+                        "error": "Session time conflicts with existing sessions",
+                        "conflicts": conflicting_sessions
+                    }, 
+                    status=status.HTTP_409_CONFLICT
+                )
             
             userProfile = UserProfile.objects.get(user_id=request.user.id)
             teacher = Teacher.objects.get(id=userProfile.dbUniqueID)
