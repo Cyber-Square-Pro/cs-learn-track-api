@@ -1,5 +1,5 @@
 from django.urls import path
-from api.views import ListBatchEndPoint, CheckUserTypeEndPoint, GetTeacherData, GetStudentData, GetTeacherDashboardDetails, TeacherGetStudentData
+from api.views import ListBatchEndPoint, CheckUserTypeEndPoint, GetTeacherData, GetStudentData, GetTeacherDashboardDetails, TeacherGetStudentData, GetSessionAttendace
 
 urlpatterns = [
     path('batch/list/', ListBatchEndPoint.as_view()),
@@ -8,4 +8,5 @@ urlpatterns = [
     path('student/data/', GetStudentData.as_view()),
     path('teacher/dashboard/', GetTeacherDashboardDetails.as_view()),
     path('teacher/student/data/', TeacherGetStudentData.as_view()),
+    path('session/attendance/', GetSessionAttendace.as_view()),
 ]

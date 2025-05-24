@@ -219,3 +219,47 @@ class TeacherGetStudentData(APIView):
             "profilePic": student.profilePic.url if student.profilePic else None
         }
         return Response({"student_data": student_data, "status": status.HTTP_200_OK})
+
+class GetSessionAttendace(APIView):
+    """
+    API endpoint to get the attendance of a specific session.
+
+    This endpoint handles POST requests and returns the attendance details of the session specified by its ID.
+
+    Methods:
+        post(request): 
+            Accepts a "sessionId" in the request data and returns the attendance details for that session.
+
+    Responses:
+        - 200 OK: If the session is found and attendance data is returned successfully.
+        - 400 Bad Request: If the session ID is not provided.
+        - 404 Not Found: If no session exists with the given ID.
+        - 401 Unauthorized: If the JWT token is invalid or not provided.
+
+    Created by: Yash Raj on 24/05/2025
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [isTeacher]
+
+    def post(self, request):
+        session_id = request.data.get("session_id")
+        if not session_id:
+            return Response({"message": "Session ID is required", "status": status.HTTP_400_BAD_REQUEST})
+        
+        try:
+            session = Session.objects.get(id=session_id)
+        except Session.DoesNotExist:
+            return Response({"message": "Session not found", "status": status.HTTP_404_NOT_FOUND})
+        
+        attendance_records = Attendance.objects.filter(session=session)
+        attendance_data = []
+        
+        for record in attendance_records:
+            student_data = {
+                "admissionNo": record.student.admissionNo,
+                "studentName": record.student.studentName,
+                "status": record.status
+            }
+            attendance_data.append(student_data)
+        
+        return Response({"attendance_data": attendance_data, "status": status.HTTP_200_OK}) 
