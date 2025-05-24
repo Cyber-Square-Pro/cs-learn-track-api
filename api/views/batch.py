@@ -220,3 +220,55 @@ class CreateSession(APIView):
             return Response(
                 {"error": str(e)}, status=status.HTTP_400_BAD_REQUEST
             )
+
+
+class GetBatchSessions(APIView):
+    """
+    API endpoint to retrieve all sessions for a given batch.
+
+    This endpoint handles POST requests and returns the list of sessions for the specified batch.
+
+    Methods:
+        post(request):
+            Expects 'batch_id' in the request data and returns the list of sessions.
+
+    Responses:
+        - 200 OK: If the batch is found and sessions are returned.
+        - 400 Bad Request: If 'batch_id' is not provided.
+        - 404 Not Found: If the batch does not exist.
+        - 401 Unauthorized: If the JWT token is invalid or not provided.
+
+    Created by: Yash Raj on 24/05/2025
+    """
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [isTeacher]
+
+    def post(self, request):
+        batch_id = request.data.get("batch_id")
+        if not batch_id:
+            return Response(
+                {"error": "batch_id is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        try:
+            batch = Batch.objects.get(id=batch_id)
+            sessions = Session.objects.filter(batch=batch).order_by("startDateTime")
+            data = {
+                "batch_name": batch.batchName,
+                "batch_id": batch.id,
+                "sessions": [
+                    {
+                        "id": session.id,
+                        "sessionName": session.sessionName,
+                        "startDateTime": session.startDateTime,
+                        "endDateTime": session.endDateTime,
+                        "createdBy": session.createdBy.name if session.createdBy else None,
+                    }
+                    for session in sessions
+                ],
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        except Batch.DoesNotExist:
+            return Response(
+                {"error": "Batch not found"}, status=status.HTTP_404_NOT_FOUND
+            )
