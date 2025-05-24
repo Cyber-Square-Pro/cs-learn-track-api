@@ -14,9 +14,16 @@ class UpdateStudentData(APIView):
 
     def post(self, request):
         data = request.data
-        admission_no = data.get('admission_no')
-        if not admission_no:
-            return Response({"error": "admission_no is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        admission_no = None
+
+        userProfile = UserProfile.objects.get(user_id=data.id)
+        if userProfile.role == 'teacher':
+            admission_no = data.get('admission_no')
+            if not admission_no:
+                return Response({"error": "admission_no is required as you are a teacher"}, status=status.HTTP_400_BAD_REQUEST)
+        elif userProfile.role == 'student':
+            admission_no = userProfile.dbUniqueID
         student = StudentData.objects.filter(admissionNo=admission_no).first()
 
         if not student:
