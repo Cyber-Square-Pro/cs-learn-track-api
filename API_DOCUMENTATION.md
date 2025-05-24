@@ -1,545 +1,827 @@
-# API Documentation
+# CS Learn Track API Documentation
 
 ---
 
-### POST /student/login/
+### `POST /student/login/`
+**Auth Required:** No
 
-**Description**: Student login endpoint. Validates student credentials and returns JWT tokens if successful.
-
-**Parameters**:
-- **Request Body**:
+**Request Body:**
 ```json
 {
-  "admissionNo": "Student's admission number (integer)",
-  "studentPassword": "Student's password (string)"
+  "admissionNo": "integer (required)",
+  "studentPassword": "string (required)"
 }
 ```
-
-**Returns**:
-- **Status**: 200 OK (others: 400 Bad Request)
-- **Response Example**:
+Response (200 OK):
 ```json
 {
   "message": "Student logged in successfully",
-  "name": "John Doe",
+  "name": "string",
   "status": 200,
-  "refresh": "<refresh_token>",
-  "access": "<access_token>"
+  "refresh": "string",
+  "access": "string"
 }
 ```
+Status Codes:
 
-**Authentication Required**: No  
-**Authentication Type**: None
+- 200 OK
+- 400 Bad Request (invalid data, student not found, or wrong password)
 
 ---
 
-### POST /teacher/login/
+### `POST /teacher/login/`
+**Auth Required:** No
 
-**Description**: Teacher login endpoint. Validates teacher credentials and returns JWT tokens if successful.
-
-**Parameters**:
-- **Request Body**:
+**Request Body:**
 ```json
 {
-  "email": "Teacher's email (string)",
-  "teacherPassword": "Teacher's password (string)"
+  "email": "string (required)",
+  "teacherPassword": "string (required)"
 }
 ```
-
-**Returns**:
-- **Status**: 200 OK (others: 400 Bad Request)
-- **Response Example**:
+Response (200 OK):
 ```json
 {
   "message": "Teacher logged in successfully",
-  "name": "Jane Smith",
+  "name": "string",
   "status": 200,
-  "refresh": "<refresh_token>",
-  "access": "<access_token>"
+  "refresh": "string",
+  "access": "string"
 }
 ```
+Status Codes:
 
-**Authentication Required**: No  
-**Authentication Type**: None
+- 200 OK
+- 400 Bad Request (invalid data, teacher not found, or wrong password)
 
 ---
 
-### POST /adminendpoint/login/
+### `POST /adminendpoint/login/`
+**Auth Required:** No
 
-**Description**: Admin login endpoint. Validates admin credentials.
-
-**Parameters**:
-- **Request Body**:
+**Request Body:**
 ```json
 {
-  "username": "Admin username (string)",
-  "password": "Admin password (string)"
+  "username": "string (required)",
+  "password": "string (required)"
 }
 ```
-
-**Returns**:
-- **Status**: 200 OK (others: 400 Bad Request)
-- **Response Example**:
+Response (200 OK):
 ```json
 {
   "message": "Admin logged in successfully",
   "status": 200
 }
 ```
+Status Codes:
 
-**Authentication Required**: No  
-**Authentication Type**: None
+- 200 OK
+- 400 Bad Request (invalid data, admin not found, or wrong password)
 
 ---
 
-### POST /logout/
+### `POST /logout/`
+**Auth Required:** Yes — JWT Bearer (student/teacher)
 
-**Description**: Logs out the current user and blacklists the refresh token.
-
-**Parameters**:
-- **Request Body**:
+**Request Body:**
 ```json
 {
-  "refresh": "Refresh token (string)"
+  "refresh": "string (optional)"
 }
 ```
-
-**Returns**:
-- **Status**: 200 OK (others: 400 Bad Request)
-- **Response Example**:
+Response (200 OK):
 ```json
 {
   "message": "Logged out successfully",
   "status": 200
 }
 ```
+Status Codes:
 
-**Authentication Required**: Yes  
-**Authentication Type**: Student / Teacher (JWT Token)
+- 200 OK
+- 400 Bad Request (invalid token)
+- 401 Unauthorized (missing/invalid token)
 
 ---
 
-### POST /token/refresh/
+### `POST /token/refresh/`
+**Auth Required:** No
 
-**Description**: Regenerates an access token using a valid refresh token.
-
-**Parameters**:
-- **Request Body**:
+**Request Body:**
 ```json
 {
-  "refresh": "Refresh token (string)"
+  "refresh": "string (required)"
 }
 ```
-
-**Returns**:
-- **Status**: 200 OK (others: 400 Bad Request)
-- **Response Example**:
+Response (200 OK):
 ```json
 {
-  "access": "<access_token>",
+  "access": "string",
   "status": 200
 }
 ```
+Status Codes:
 
-**Authentication Required**: No  
-**Authentication Type**: None
-
----
-
-### POST /batch/list/
-
-**Description**: Lists all batches a teacher is in charge of.
-
-**Parameters**:
-- **Request Body**: None
-
-**Returns**:
-- **Status**: 200 OK
-- **Response Example**:
-```json
-{
-  "batches": [
-    {"id": 1, "name": "Batch A"},
-    {"id": 2, "name": "Batch B"}
-  ],
-  "status": 200
-}
-```
-
-**Authentication Required**: Yes  
-**Authentication Type**: Teacher Token
+- 200 OK
+- 400 Bad Request (invalid token)
 
 ---
 
-### POST /CheckUserTypeEndPoint/
+### `POST /batch/create/`
+**Auth Required:** Yes — JWT Bearer (teacher)
 
-**Description**: Checks the type of the current user (teacher or student) based on JWT token.
-
-**Parameters**:
-- **Request Body**: None
-
-**Returns**:
-- **Status**: 200 OK (others: 400 Bad Request)
-- **Response Example**:
+**Request Body:**
 ```json
 {
-  "role": "teacher",
-  "status": 200
+  "batchName": "string (required)",
+  "description": "string (optional)"
 }
 ```
-
-**Authentication Required**: Yes  
-**Authentication Type**: Student / Teacher Token
-
----
-
-### POST /teacher/data/
-
-**Description**: Retrieves all data for the authenticated teacher.
-
-**Parameters**:
-- **Request Body**: None
-
-**Returns**:
-- **Status**: 200 OK
-- **Response Example**:
-```json
-{
-  "teacher_data": {
-    "id": 1,
-    "name": "Jane Smith",
-    "email": "jane@example.com",
-    "contactNo": "1234567890",
-    "hireDate": "2025-01-01",
-    "teacherPassword": "<hidden>",
-    "profilePic": "/media/profile_pictures/jane.jpg"
-  },
-  "status": 200
-}
-```
-
-**Authentication Required**: Yes  
-**Authentication Type**: Teacher Token
-
----
-
-### POST /student/data/
-
-**Description**: Retrieves all data for the authenticated student.
-
-**Parameters**:
-- **Request Body**: None
-
-**Returns**:
-- **Status**: 200 OK
-- **Response Example**:
-```json
-{
-  "student_data": {
-    "admissionNo": 1001,
-    "studentName": "John Doe",
-    "rollNo": 1,
-    "studentClass": "10A",
-    "gender": "Male",
-    "fatherName": "Mr. Doe",
-    "email": "john@example.com",
-    "contactNo": "9876543210",
-    "joinedDate": "2025-01-01",
-    "studentPassword": "<hidden>",
-    "profilePic": "/media/profile_pictures/john.jpg"
-  },
-  "status": 200
-}
-```
-
-**Authentication Required**: Yes  
-**Authentication Type**: Student Token
-
----
-
-### POST /teacher/dashboard/
-
-**Description**: Returns dashboard details for the teacher, including total students, active students, and recent students.
-
-**Parameters**:
-- **Request Body**: None
-
-**Returns**:
-- **Status**: 200 OK
-- **Response Example**:
-```json
-{
-  "total_students": 100,
-  "active_students": 80,
-  "recent_students_details": [
-    {"admissionNo": 1001, "studentName": "John Doe", "batch": "Batch A", "email": "john@example.com", "active": true}
-  ],
-  "status": 200
-}
-```
-
-**Authentication Required**: Yes  
-**Authentication Type**: Teacher Token
-
----
-
-### POST /batch/create/
-
-**Description**: Creates a new batch. Only accessible by teachers.
-
-**Parameters**:
-- **Request Body**:
-```json
-{
-  "batchName": "Name of the batch (string)",
-  "description": "Description (string, optional)"
-}
-```
-
-**Returns**:
-- **Status**: 201 Created (others: 400 Bad Request)
-- **Response Example**:
+Response (201 Created):
 ```json
 {
   "message": "Batch created successfully",
   "status": 201
 }
 ```
+Status Codes:
 
-**Authentication Required**: Yes  
-**Authentication Type**: Teacher Token
+- 201 Created
+- 400 Bad Request (invalid data)
+- 401 Unauthorized (missing/invalid token)
+- 403 Forbidden (wrong role)
 
 ---
 
-### POST /student/register/
+### `POST /student/register/`
+**Auth Required:** Yes — JWT Bearer (teacher)
 
-**Description**: Registers a new student. Only accessible by teachers.
-
-**Parameters**:
-- **Request Body**:
+**Request Body:**
 ```json
 {
-  "studentName": "Student's name (string)",
-  "studentClass": "Class (string)",
-  "division": "Division (string)",
-  "gender": "Gender (string)",
-  "fatherName": "Father's name (string)",
-  "email": "Email (string)",
-  "contactNo": "Contact number (string)",
-  "joinedDate": "Date joined (YYYY-MM-DD)",
-  "studentPassword": "Password (string)",
-  "batch": "Batch ID (integer)",
-  "profilePic": "Profile picture (file, optional)"
+  "studentName": "string (required)",
+  "studentClass": "string (required)",
+  "division": "string (required)",
+  "gender": "string (required)",
+  "fatherName": "string (required)",
+  "email": "string (required)",
+  "contactNo": "string (required)",
+  "joinedDate": "date (required)",
+  "studentPassword": "string (required)",
+  "batch": "integer (required)",
+  "profilePic": "file (optional)"
 }
 ```
-
-**Returns**:
-- **Status**: 201 Created (others: 400 Bad Request, 500 Internal Server Error)
-- **Response Example**:
+Response (201 Created):
 ```json
 {
   "message": "Student registered successfully",
-  "admissionNo": 1001,
+  "admissionNo": "integer",
   "status": 201
 }
 ```
+Status Codes:
 
-**Authentication Required**: Yes  
-**Authentication Type**: Teacher Token
+- 201 Created
+- 400 Bad Request (invalid data, batch not found)
+- 401 Unauthorized (missing/invalid token)
+- 403 Forbidden (wrong role)
 
 ---
 
-### POST /teacher/register/
+### `POST /teacher/register/`
+**Auth Required:** No
 
-**Description**: Registers a new teacher.
-
-**Parameters**:
-- **Request Body**:
+**Request Body:**
 ```json
 {
-  "name": "Teacher's name (string)",
-  "email": "Email (string)",
-  "contactNo": "Contact number (string)",
-  "hireDate": "Hire date (YYYY-MM-DD)",
-  "teacherPassword": "Password (string)",
-  "profilePic": "Profile picture (file, optional)"
+  "name": "string (required)",
+  "email": "string (required)",
+  "contactNo": "string (required)",
+  "hireDate": "date (required)",
+  "teacherPassword": "string (required)",
+  "profilePic": "file (optional)"
 }
 ```
-
-**Returns**:
-- **Status**: 201 Created (others: 400 Bad Request, 500 Internal Server Error)
-- **Response Example**:
+Response (201 Created):
 ```json
 {
   "message": "Teacher registered successfully",
   "status": 201
 }
 ```
+Status Codes:
 
-**Authentication Required**: No  
-**Authentication Type**: None
+- 201 Created
+- 400 Bad Request (invalid data)
 
 ---
 
-### POST /database/clear/
+### `POST /database/clear/`
+**Auth Required:** No
 
-**Description**: Clears all data from the database (students, batches, teachers, user profiles, users).
-
-**Parameters**:
-- **Request Body**: None
-
-**Returns**:
-- **Status**: 200 OK
-- **Response Example**:
+**Request Body:**
+```json
+{}
+```
+Response (200 OK):
 ```json
 {
   "message": "All data cleared successfully."
 }
 ```
+Status Codes:
 
-**Authentication Required**: No  
-**Authentication Type**: None
+- 200 OK
 
 ---
 
-### GET /test/
+### `GET /test/`
+**Auth Required:** No
 
-**Description**: Test endpoint to verify API is working.
+**Request Body:**
+_None_
 
-**Parameters**:
-- **Request Body**: None
-
-**Returns**:
-- **Status**: 200 OK
-- **Response Example**:
+Response (200 OK):
 ```json
 {
   "message": "Test Succesfull"
 }
 ```
+Status Codes:
 
-**Authentication Required**: No  
-**Authentication Type**: None
-
----
-
-### POST /batch/list_batch_students/
-
-**Description**: Retrieves the list of students in a given batch. Only accessible by teachers.
-
-**Parameters**:
-- **Request Body**:
-```json
-{
-  "batch_id": "Batch ID (integer)"
-}
-```
-
-**Returns**:
-- **Status**: 200 OK (others: 400 Bad Request, 404 Not Found)
-- **Response Example**:
-```json
-{
-  "batch": "Batch A",
-  "students": [
-    {"name": "John Doe", "rollNo": 1, "admissionNo": 1001}
-  ]
-}
-```
-
-**Authentication Required**: Yes  
-**Authentication Type**: Teacher Token
+- 200 OK
 
 ---
 
-### POST /batch/teacher_student_list/
+### `POST /batch/list/`
+**Auth Required:** Yes — JWT Bearer (teacher)
 
-**Description**: Retrieves the list of all students in batches where the authenticated teacher is in charge.
-
-**Parameters**:
-- **Request Body**: None
-
-**Returns**:
-- **Status**: 200 OK (others: 404 Not Found)
-- **Response Example**:
+**Request Body:**
+```json
+{}
+```
+Response (200 OK):
 ```json
 {
-  "students": [
+  "batches": [
+    {"id": "integer", "name": "string"},
+    ...
+  ],
+  "status": 200
+}
+```
+Status Codes:
+
+- 200 OK
+- 401 Unauthorized (missing/invalid token)
+- 403 Forbidden (wrong role)
+
+---
+
+### `POST /CheckUserTypeEndPoint/`
+**Auth Required:** Yes — JWT Bearer (teacher/student)
+
+**Request Body:**
+```json
+{}
+```
+Response (200 OK):
+```json
+{
+  "role": "teacher|student",
+  "status": 200
+}
+```
+Status Codes:
+
+- 200 OK
+- 400 Bad Request (invalid token)
+- 401 Unauthorized (missing/invalid token)
+
+---
+
+### `POST /teacher/data/`
+**Auth Required:** Yes — JWT Bearer (teacher)
+
+**Request Body:**
+```json
+{}
+```
+Response (200 OK):
+```json
+{
+  "teacher_data": {
+    "id": "integer",
+    "name": "string",
+    "email": "string",
+    "contactNo": "string",
+    "hireDate": "date",
+    "teacherPassword": "string",
+    "profilePic": "string|null"
+  },
+  "status": 200
+}
+```
+Status Codes:
+
+- 200 OK
+- 401 Unauthorized (missing/invalid token)
+- 403 Forbidden (wrong role)
+
+---
+
+### `POST /student/data/`
+**Auth Required:** Yes — JWT Bearer (student)
+
+**Request Body:**
+```json
+{}
+```
+Response (200 OK):
+```json
+{
+  "student_data": {
+    "admissionNo": "integer",
+    "studentName": "string",
+    "rollNo": "integer",
+    "studentClass": "string",
+    "gender": "string",
+    "fatherName": "string",
+    "email": "string",
+    "contactNo": "string",
+    "joinedDate": "date",
+    "studentPassword": "string",
+    "profilePic": "string|null"
+  },
+  "status": 200
+}
+```
+Status Codes:
+
+- 200 OK
+- 401 Unauthorized (missing/invalid token)
+- 403 Forbidden (wrong role)
+
+---
+
+### `POST /teacher/dashboard/`
+**Auth Required:** Yes — JWT Bearer (teacher)
+
+**Request Body:**
+```json
+{}
+```
+Response (200 OK):
+```json
+{
+  "total_students": "integer",
+  "active_students": "integer",
+  "recent_students_details": [
     {
-      "name": "John Doe",
-      "rollNo": 1,
-      "admissionNo": 1001,
-      "batch": "Batch A"
-    }
-  ]
+      "admissionNo": "integer",
+      "studentName": "string",
+      "batch": "string",
+      "email": "string",
+      "active": "boolean"
+    },
+    ...
+  ],
+  "attendance_data": [
+    {"date": "string", "percentage": "float"},
+    ...
+  ],
+  "status": 200
 }
 ```
+Status Codes:
 
-**Authentication Required**: Yes  
-**Authentication Type**: Teacher Token
+- 200 OK
+- 401 Unauthorized (missing/invalid token)
+- 403 Forbidden (wrong role)
 
 ---
 
-### POST /batch/remove_student/
+### `POST /teacher/student/data/`
+**Auth Required:** Yes — JWT Bearer (teacher)
 
-**Description**: Removes a student from a batch. Only accessible by teachers.
-
-**Parameters**:
-- **Request Body**:
+**Request Body:**
 ```json
 {
-  "admissionNo": "Student's admission number (integer)"
+  "admissionNo": "integer (required)"
 }
 ```
+Response (200 OK):
+```json
+{
+  "student_data": {
+    "admissionNo": "integer",
+    "studentName": "string",
+    "rollNo": "integer",
+    "studentClass": "string",
+    "gender": "string",
+    "fatherName": "string",
+    "email": "string",
+    "contactNo": "string",
+    "joinedDate": "date",
+    "studentPassword": "string",
+    "profilePic": "string|null"
+  },
+  "status": 200
+}
+```
+Status Codes:
 
-**Returns**:
-- **Status**: 200 OK (others: 400 Bad Request, 404 Not Found)
-- **Response Example**:
+- 200 OK
+- 400 Bad Request (missing admissionNo)
+- 404 Not Found (student not found)
+- 401 Unauthorized (missing/invalid token)
+- 403 Forbidden (wrong role)
+
+---
+
+### `POST /session/attendance/`
+**Auth Required:** Yes — JWT Bearer (teacher)
+
+**Request Body:**
+```json
+{
+  "session_id": "integer (required)"
+}
+```
+Response (200 OK):
+```json
+{
+  "attendance_data": [
+    {"admissionNo": "integer", "studentName": "string", "status": "boolean"},
+    ...
+  ],
+  "status": 200
+}
+```
+Status Codes:
+
+- 200 OK
+- 400 Bad Request (missing session_id)
+- 404 Not Found (session not found)
+- 401 Unauthorized (missing/invalid token)
+- 403 Forbidden (wrong role)
+
+---
+
+### `POST /attendance/history/`
+**Auth Required:** Yes — JWT Bearer (teacher/student)
+
+**Request Body:**
+```json
+{
+  "admission_no": "integer (required for teacher, ignored for student)"
+}
+```
+Response (200 OK):
+```json
+{
+  "attendance_history": [
+    {
+      "sessionName": "string",
+      "startDateTime": "datetime",
+      "endDateTime": "datetime",
+      "status": "boolean"
+    },
+    ...
+  ],
+  "status": 200
+}
+```
+Status Codes:
+
+- 200 OK
+- 400 Bad Request (missing admission_no for teacher)
+- 404 Not Found (student not found)
+- 401 Unauthorized (missing/invalid token)
+
+---
+
+### `POST /batch/list_batch_students/`
+**Auth Required:** Yes — JWT Bearer (teacher)
+
+**Request Body:**
+```json
+{
+  "batch_id": "integer (required)"
+}
+```
+Response (200 OK):
+```json
+{
+  "batch": "string",
+  "students": [
+    {"name": "string", "email": "string", "admissionNo": "integer"},
+    ...
+  ]
+}
+```
+Status Codes:
+
+- 200 OK
+- 400 Bad Request (missing batch_id)
+- 404 Not Found (batch not found)
+- 401 Unauthorized (missing/invalid token)
+- 403 Forbidden (wrong role)
+
+---
+
+### `POST /batch/remove_student/`
+**Auth Required:** Yes — JWT Bearer (teacher)
+
+**Request Body:**
+```json
+{
+  "admissionNo": "integer (required)"
+}
+```
+Response (200 OK):
 ```json
 {
   "message": "Student removed from batch"
 }
 ```
+Status Codes:
 
-**Authentication Required**: Yes  
-**Authentication Type**: Teacher Token
+- 200 OK
+- 400 Bad Request (missing admissionNo)
+- 404 Not Found (student not found)
+- 401 Unauthorized (missing/invalid token)
+- 403 Forbidden (wrong role)
+
+---
+
+### `POST /batch/teacher_student_list/`
+**Auth Required:** Yes — JWT Bearer (teacher)
+
+**Request Body:**
+```json
+{}
+```
+Response (200 OK):
+```json
+{
+  "students": [
+    {"name": "string", "rollNo": "integer", "admissionNo": "integer", "batch": "string"},
+    ...
+  ]
+}
+```
+Status Codes:
+
+- 200 OK
+- 404 Not Found (teacher not found)
+- 401 Unauthorized (missing/invalid token)
+- 403 Forbidden (wrong role)
 
 ---
 
-### POST /teacher/get_student_data/
+### `POST /batch/create_session/`
+**Auth Required:** Yes — JWT Bearer (teacher)
 
-**Description**: Allows a teacher to retrieve detailed data for a specific student by admission number.
-
-**Parameters**:
-- **Request Body**:
+**Request Body:**
 ```json
 {
-  "admissionNo": "Student's admission number (integer)"
+  "sessionName": "string (required)",
+  "batch_id": "integer (required)",
+  "startDateTime": "datetime (required)",
+  "endDateTime": "datetime (required)"
 }
 ```
-
-**Returns**:
-- **Status**: 200 OK (others: 404 Not Found, 403 Forbidden)
-- **Response Example**:
+Response (201 Created):
 ```json
 {
-  "student_data": {
-    "admissionNo": 1001,
-    "studentName": "John Doe",
-    "rollNo": 1,
-    "studentClass": "10A",
-    "gender": "Male",
-    "fatherName": "Mr. Doe",
-    "email": "john@example.com",
-    "contactNo": "9876543210",
-    "joinedDate": "2025-01-01",
-    "profilePic": "/media/profile_pictures/john.jpg"
-  },
-  "status": 200
+  "id": "integer",
+  "sessionName": "string",
+  "batch_id": "integer",
+  "startDateTime": "datetime",
+  "endDateTime": "datetime"
 }
 ```
+Status Codes:
 
-**Authentication Required**: Yes  
-**Authentication Type**: Teacher Token
+- 201 Created
+- 400 Bad Request (missing/invalid fields)
+- 404 Not Found (batch not found)
+- 409 Conflict (session time conflict)
+- 401 Unauthorized (missing/invalid token)
+- 403 Forbidden (wrong role)
 
 ---
+
+### `POST /batch/get_batch_sessions/`
+**Auth Required:** Yes — JWT Bearer (teacher/student)
+
+**Request Body:**
+```json
+{
+  "batch_id": "integer (required for teacher, ignored for student)"
+}
+```
+Response (200 OK):
+```json
+{
+  "batch_name": "string",
+  "batch_id": "integer",
+  "sessions": [
+    {
+      "id": "integer",
+      "sessionName": "string",
+      "startDateTime": "datetime",
+      "endDateTime": "datetime",
+      "createdBy": "string|null"
+    },
+    ...
+  ]
+}
+```
+Status Codes:
+
+- 200 OK
+- 400 Bad Request (missing batch_id for teacher)
+- 404 Not Found (batch or student not found)
+- 401 Unauthorized (missing/invalid token)
+
+---
+
+### `POST /batch/mark_attendance/`
+**Auth Required:** Yes — JWT Bearer (teacher)
+
+**Request Body:**
+```json
+{
+  "session_id": "integer (required)",
+  "attendance": ["integer", ...] (required, list of admission numbers present)
+}
+```
+Response (200 OK):
+```json
+{
+  "message": "Attendance marked successfully"
+}
+```
+Status Codes:
+
+- 200 OK
+- 400 Bad Request (missing session_id or attendance data)
+- 404 Not Found (session or batch not found)
+- 401 Unauthorized (missing/invalid token)
+- 403 Forbidden (wrong role)
+
+---
+
+### `POST /student/update/`
+**Auth Required:** Yes — JWT Bearer (teacher/student)
+
+**Request Body:**
+```json
+{
+  "admission_no": "integer (required for teacher, ignored for student)",
+  "studentName": "string (optional)",
+  "gender": "string (optional)",
+  "fatherName": "string (optional)",
+  "email": "string (optional)",
+  "contactNo": "string (optional)",
+  "joinedDate": "date (optional)",
+  "studentPassword": "string (optional)",
+  "profilePic": "file (optional)"
+}
+```
+Response (200 OK):
+```json
+{
+  "admissionNo": "integer",
+  "studentName": "string",
+  "rollNo": "integer",
+  "studentClass": "string",
+  "division": "string",
+  "gender": "string",
+  "fatherName": "string",
+  "email": "string",
+  "contactNo": "string",
+  "joinedDate": "date",
+  "accountStatus": "boolean",
+  "studentPassword": "string",
+  "batch": "integer",
+  "createdAt": "datetime",
+  "profilePic": "string|null"
+}
+```
+Status Codes:
+
+- 200 OK
+- 400 Bad Request (invalid data, missing admission_no for teacher)
+- 404 Not Found (student not found)
+- 401 Unauthorized (missing/invalid token)
+
+---
+
+### `POST /batch/update/`
+**Auth Required:** Yes — JWT Bearer (teacher)
+
+**Request Body:**
+```json
+{
+  "batch_id": "integer (required)",
+  "batchName": "string (optional)",
+  "description": "string (optional)",
+  "batchStatus": "boolean (optional)",
+  "batchIncharge": "integer (optional)",
+  "teachers": ["integer", ...] (optional)
+}
+```
+Response (200 OK):
+```json
+{
+  "id": "integer",
+  "batchName": "string",
+  "description": "string",
+  "batchStatus": "boolean",
+  "createdAt": "datetime",
+  "batchIncharge": "integer|null",
+  "teachers": ["integer", ...]
+}
+```
+Status Codes:
+
+- 200 OK
+- 400 Bad Request (invalid data, missing batch_id)
+- 404 Not Found (batch not found)
+- 401 Unauthorized (missing/invalid token)
+
+---
+
+### `POST /session/update/`
+**Auth Required:** Yes — JWT Bearer (teacher)
+
+**Request Body:**
+```json
+{
+  "session_id": "integer (required)",
+  "sessionName": "string (optional)",
+  "batch": "integer (optional)",
+  "startDateTime": "datetime (optional)",
+  "endDateTime": "datetime (optional)"
+}
+```
+Response (200 OK):
+```json
+{
+  "id": "integer",
+  "sessionName": "string",
+  "batch": "integer",
+  "createdBy": "integer|null",
+  "startDateTime": "datetime",
+  "endDateTime": "datetime"
+}
+```
+Status Codes:
+
+- 200 OK
+- 400 Bad Request (invalid data, missing session_id)
+- 404 Not Found (session not found)
+- 401 Unauthorized (missing/invalid token)
+
+---
+
+### `POST /teacher/update/`
+**Auth Required:** Yes — JWT Bearer (teacher)
+
+**Request Body:**
+```json
+{
+  "name": "string (optional)",
+  "subject": "string (optional)",
+  "contactNo": "string (optional)",
+  "profilePic": "file (optional)"
+}
+```
+Response (200 OK):
+```json
+{
+  "name": "string",
+  "subject": "string",
+  "contactNo": "string",
+  "profilePic": "string|null"
+}
+```
+Status Codes:
+
+- 200 OK
+- 400 Bad Request (invalid data)
+- 404 Not Found (teacher not found)
+- 401 Unauthorized (missing/invalid token)
+
+---
+
+# Notes
+- All endpoints that require authentication expect a JWT Bearer token in the `Authorization` header.
+- If a view uses `isTeacher`, only teachers can access. If it uses `isStudent`, only students can access. If both, both roles can access but logic may differ (see endpoint description).
+- For update endpoints, only fields provided in the request body are updated (partial update).
+- For endpoints returning nested objects, see the response examples for structure.
+- Status codes 401 and 403 are returned for missing/invalid tokens or wrong roles, respectively.
