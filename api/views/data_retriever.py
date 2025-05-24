@@ -5,6 +5,7 @@ from api.serializers import *
 from rest_framework import status
 from api.permissions import isTeacher, isStudent
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from datetime import datetime, timedelta
 
 class CheckUserTypeEndPoint(APIView):
     """
@@ -173,7 +174,55 @@ class GetTeacherDashboardDetails(APIView):
             }
             recent_students_details.append(student_data)
 
-        return Response({"total_students": total_students, "active_students": active_students, "recent_students_details": recent_students_details, "status": status.HTTP_200_OK})
+        # Get teacher data
+        userProfile = UserProfile.objects.get(user_id=request.user.id)
+        teacher = Teacher.objects.get(id=userProfile.dbUniqueID)
+
+        # Get batches where this teacher is in charge or teaches
+        # batches_incharge = Batch.objects.filter(batchIncharge=teacher)
+        # batches_teaching = Batch.objects.filter(teachers=teacher)
+        # batches = batches_incharge.union(batches_teaching)
+
+        # Get batches where this teacher is in charge
+        batches = Batch.objects.filter(batchIncharge=teacher)
+
+        # Get attendance data for the last 4 days
+
+        # Get the current date
+        current_date = datetime.now().date()
+
+        # Initialize data structure to store attendance percentage for last 4 days
+        attendance_data = []
+
+        # Calculate attendance for each of the last 4 days
+        for i in range(4):
+            day_date = current_date - timedelta(days=i)
+            
+            # Get sessions for this day that are for batches where this teacher is involved
+            sessions = Session.objects.filter(batch__in=batches, startDateTime__date=day_date)
+            
+            # Initialize counters
+            total_attendance_records = 0
+            present_count = 0
+            
+            # Go through each session and count attendance
+            for session in sessions:
+                attendance_records = Attendance.objects.filter(session=session)
+                total_attendance_records += attendance_records.count()
+                present_count += attendance_records.filter(status=True).count()
+            
+            # Calculate percentage (avoid division by zero)
+            attendance_percentage = 0
+            if total_attendance_records > 0:
+                attendance_percentage = (present_count / total_attendance_records) * 100
+            
+            # Add to our data
+            attendance_data.append({
+                "date": day_date.strftime('%d-%m-%Y'),
+                "percentage": round(attendance_percentage, 2)
+            })
+
+        return Response({"total_students": total_students, "active_students": active_students, "recent_students_details": recent_students_details, "attendance_data": attendance_data, "status": status.HTTP_200_OK})
 
 class TeacherGetStudentData(APIView):
     """
