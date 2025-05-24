@@ -4,6 +4,62 @@
 
 ## Authentication
 
+### `POST /add_face_encoding/`
+**Auth Required:** Yes — JWT Bearer (student)
+
+**Request Body:**
+```json
+{
+  "face_image": "string (required, base64-encoded image)"
+}
+```
+Response (200 OK):
+```json
+{
+  "message": "Face encoding added successfully",
+  "status": 200
+}
+```
+Status Codes:
+
+- 200 OK
+- 400 Bad Request (invalid data, no face detected, or error processing image)
+- 403 Forbidden (only students can add face encoding)
+- 401 Unauthorized (missing/invalid token)
+
+---
+
+### `POST /student/login_face/`
+**Auth Required:** No
+
+**Request Body:**
+```json
+{
+  "admissionNo": "integer (required)",
+  "login_image": "string (required, base64-encoded image)"
+}
+```
+Response (200 OK):
+```json
+{
+  "message": "Student logged in successfully",
+  "name": "string",
+  "status": 200,
+  "refresh": "string",
+  "access": "string"
+}
+```
+Status Codes:
+
+- 200 OK
+- 400 Bad Request (invalid data, student not found, face encoding not found, no face detected, or face does not match)
+
+---
+
+**Note:** For all face recognition endpoints, the image must be sent as a base64-encoded string. If using a data URL, only the base64 part is required, but the API can handle both formats.
+
+---
+
 ### `POST /student/login/`
 **Auth Required:** No
 
@@ -832,6 +888,7 @@ Status Codes:
 - 200 OK
 
 ---
+
 
 # Notes
 - All endpoints that require authentication expect a JWT Bearer token in the `Authorization` header.
