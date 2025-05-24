@@ -208,7 +208,6 @@ class CreateSession(APIView):
                 "batch_id": session.batch.id,
                 "startDateTime": session.startDateTime,
                 "endDateTime": session.endDateTime,
-                "createdBy": session.createdBy.username
             }
             
             return Response(data, status=status.HTTP_201_CREATED)
