@@ -26,7 +26,7 @@ class Batch(models.Model):
 
 class Session(models.Model):
     id = models.AutoField(primary_key=True)
-    sessionName = models.CharField(max_length=50)
+    sessionName = models.CharField(max_length=50, unique=True)
     batch = models.ForeignKey(Batch, on_delete=models.CASCADE, related_name='sessions')
     createdBy = models.ForeignKey(
         "Teacher", on_delete=models.SET_NULL, null=True, blank=True, related_name='created_sessions'
