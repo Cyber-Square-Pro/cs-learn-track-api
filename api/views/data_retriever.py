@@ -97,7 +97,7 @@ class GetTeacherData(APIView):
             "contactNo": teacher.contactNo,
             "hireDate": teacher.hireDate,
             "teacherPassword": teacher.teacherPassword,
-            "profilePic": teacher.profilePic.url if teacher.profilePic else None
+            "profilePic": teacher.profilePic if teacher.profilePic else None
         }
         return Response({"teacher_data": teacher_data, "status": status.HTTP_200_OK})
 
@@ -134,7 +134,7 @@ class GetStudentData(APIView):
             "contactNo": student.contactNo,
             "joinedDate": student.joinedDate,
             "studentPassword": student.studentPassword,
-            "profilePic": student.profilePic.url if student.profilePic else None
+            "profilePic": student.profilePic if student.profilePic else None
         }
         return Response({"student_data": student_data, "status": status.HTTP_200_OK})
 
@@ -265,7 +265,7 @@ class TeacherGetStudentData(APIView):
             "contactNo": student.contactNo,
             "joinedDate": student.joinedDate,
             "studentPassword": student.studentPassword,
-            "profilePic": student.profilePic.url if student.profilePic else None
+            "profilePic": student.profilePic if student.profilePic else None
         }
         return Response({"student_data": student_data, "status": status.HTTP_200_OK})
 

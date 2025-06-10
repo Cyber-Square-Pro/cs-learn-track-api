@@ -121,7 +121,7 @@ class RegisterStudentEndPoint(APIView):
             # accountStatus=student_data["accountStatus"],
             studentPassword=student_data["studentPassword"],
             batch=batch,
-            profilePic=student_data.get("profilePic"),
+            profilePic=None,
         )
 
         # Create user account

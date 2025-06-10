@@ -4,7 +4,7 @@
 
 ## Authentication
 
-### `POST /add_face_encoding/`
+### `POST /add_pfp_and_face_encoding/`
 **Auth Required:** Yes — JWT Bearer (student)
 
 **Request Body:**
@@ -199,11 +199,10 @@ Status Codes:
   "gender": "string (required)",
   "fatherName": "string (required)",
   "email": "string (required)",
-  "contactNo": "string (required)",
-  "joinedDate": "date (required)",
-  "studentPassword": "string (required)",
-  "batch": "integer (required)",
-  "profilePic": "file (optional)"
+  "contactNo": "string (optional)",
+  "joinedDate": "date (optional)",
+  "studentPassword": "string (optional)",
+  "batch": "integer (required)"
 }
 ```
 Response (201 Created):
@@ -234,7 +233,7 @@ Status Codes:
   "contactNo": "string (required)",
   "hireDate": "date (required)",
   "teacherPassword": "string (required)",
-  "profilePic": "file (optional)"
+  "profilePic": "string (optional, base64-encoded image)"
 }
 ```
 Response (201 Created):
@@ -389,7 +388,6 @@ Status Codes:
   "contactNo": "string (optional)",
   "joinedDate": "date (optional)",
   "studentPassword": "string (optional)",
-  "profilePic": "file (optional)"
 }
 ```
 Response (200 OK):

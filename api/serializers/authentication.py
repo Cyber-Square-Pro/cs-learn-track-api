@@ -7,7 +7,7 @@ class StudentRegistrationSerializer(serializers.ModelSerializer):
         fields = [
             "studentName", "studentClass", "division", 
             "gender", "fatherName", "email", "contactNo", "joinedDate", 
-            "studentPassword", "batch", "profilePic"
+            "studentPassword", "batch",
         ]
 
 class AdminDataSerializer(serializers.ModelSerializer):
