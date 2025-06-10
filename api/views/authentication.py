@@ -279,6 +279,7 @@ class AddFaceEncodingEndPoint(APIView):
             
             # Save the encoding to the student record
             student.faceEncoding = face_encoding_binary
+            student.profilePic = face_recognition_image  # Saving the image data as profile picture (it is always image/jpeg as a base64 string)
             student.save()
             
             return Response({"message": "Face encoding added successfully", "status": status.HTTP_200_OK})

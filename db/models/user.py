@@ -32,7 +32,7 @@ class StudentData(models.Model):
 	studentPassword = models.CharField("Student account password", max_length=30)
 	batch = models.ForeignKey("Batch", on_delete=models.CASCADE, related_name='students')
 	createdAt = models.DateTimeField("Created At", auto_now_add=True)
-	profilePic = models.ImageField("Profile Picture", upload_to='profile_pictures/', blank=True, null=True)
+	profilePic = models.TextField("Profile Picture", blank=True, null=True)
 	faceEncoding = models.BinaryField("Face Encoding", blank=True, null=True)
 
 	def __str__(self):
@@ -46,7 +46,7 @@ class Teacher(models.Model):
 	hireDate = models.DateField("Hire Date")
 	contactNo = models.CharField("Contact Number", max_length=15)
 	teacherPassword = models.CharField("Teacher Password", max_length=100)
-	profilePic = models.ImageField("Profile Picture", upload_to='profile_pictures/', blank=True, null=True)
+	profilePic = models.TextField("Profile Picture", blank=True, null=True)
 
 	def __str__(self):
 		return self.name
